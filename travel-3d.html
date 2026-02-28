@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Northern Train Journey | Soysajee Oracle</title>
+    <style>
+        body {
+            margin: 0;
+            background: #f0f9ff;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+        }
+
+        #canvas-container {
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .ui-overlay {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 10;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(5px);
+        }
+
+        .ui-overlay h1 {
+            margin: 0;
+            font-size: 1.2rem;
+            color: #1e293b;
+        }
+
+        .ui-overlay p {
+            margin: 5px 0 0;
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+
+        .controls {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 10px;
+            z-index: 10;
+        }
+
+        button {
+            padding: 10px 20px;
+            border-radius: 50px;
+            border: none;
+            background: #58a6ff;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(88, 166, 255, 0.3);
+            transition: transform 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+        }
+
+        .footer {
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.75rem;
+            color: #94a3b8;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="ui-overlay">
+        <h1>🚂 3D Journey: Phrae to Phitsanulok</h1>
+        <p id="stats">Initializing engine...</p>
+    </div>
+
+    <div class="controls">
+        <button onclick="toggleCamera()">Switch Camera</button>
+    </div>
+
+    <div class="footer">
+        🌊 Created by <b>Soysajee Oracle</b> (The Gentle Stream)
+    </div>
+
+    <div id="canvas-container"></div>
+
+    <!-- Import Map (Three.js) -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.161.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.161.0/examples/jsm/"
+            }
+        }
+    </script>
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        // --- Config ---
+        const colors = {
+            ground: 0xdcfce7,
+            sky: 0xbae6fd,
+            trainBody: 0xfbcfe8,
+            trainCabin: 0xbfdbfe,
+            wheel: 0x4b5563,
+            treeLeaf: 0x86efac,
+            treeTrunk: 0xb45309
+        };
+
+        let scene, camera, renderer, train, curve, progress = 0;
+        let followCam = false;
+
+        // --- Init ---
+        function init() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(colors.sky);
+            scene.fog = new THREE.FogExp2(colors.sky, 0.005);
+
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(20, 30, 50);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true;
+            document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+
+            const sun = new THREE.DirectionalLight(0xffffff, 1);
+            sun.position.set(50, 50, 50);
+            sun.castShadow = true;
+            scene.add(sun);
+
+            // Ground
+            const groundGeo = new THREE.PlaneGeometry(2000, 2000);
+            const groundMat = new THREE.MeshPhongMaterial({ color: colors.ground });
+            const ground = new THREE.Mesh(groundGeo, groundMat);
+            ground.rotation.x = -Math.PI / 2;
+            ground.receiveShadow = true;
+            scene.add(ground);
+
+            createTrain();
+            loadPath();
+            animate();
+        }
+
+        function createTrain() {
+            train = new THREE.Group();
+
+            // Main Body
+            const bodyGeo = new THREE.BoxGeometry(2, 1.5, 4);
+            const bodyMat = new THREE.MeshPhongMaterial({ color: colors.trainBody });
+            const body = new THREE.Mesh(bodyGeo, bodyMat);
+            body.position.y = 1;
+            body.castShadow = true;
+            train.add(body);
+
+            // Cabin
+            const cabinGeo = new THREE.BoxGeometry(1.8, 1.2, 1.5);
+            const cabinMat = new THREE.MeshPhongMaterial({ color: colors.trainCabin });
+            const cabin = new THREE.Mesh(cabinGeo, cabinMat);
+            cabin.position.set(0, 2.3, -1);
+            cabin.castShadow = true;
+            train.add(cabin);
+
+            // Wheels
+            const wheelGeo = new THREE.CylinderGeometry(0.4, 0.4, 2.2, 12);
+            wheelGeo.rotateZ(Math.PI / 2);
+            const wheelMat = new THREE.MeshPhongMaterial({ color: colors.wheel });
+
+            const w1 = new THREE.Mesh(wheelGeo, wheelMat);
+            w1.position.set(0, 0.4, 1.2);
+            train.add(w1);
+
+            const w2 = new THREE.Mesh(wheelGeo, wheelMat);
+            w2.position.set(0, 0.4, -1.2);
+            train.add(w2);
+
+            scene.add(train);
+        }
+
+        function createTree(x, z) {
+            const tree = new THREE.Group();
+
+            const trunkGeo = new THREE.CylinderGeometry(0.2, 0.2, 0.6);
+            const trunkMat = new THREE.MeshPhongMaterial({ color: colors.treeTrunk });
+            const trunk = new THREE.Mesh(trunkGeo, trunkMat);
+            trunk.position.y = 0.3;
+            tree.add(trunk);
+
+            const foliageGeo = new THREE.ConeGeometry(0.8, 1.5, 8);
+            const foliageMat = new THREE.MeshPhongMaterial({ color: colors.treeLeaf });
+            const foliage = new THREE.Mesh(foliageGeo, foliageMat);
+            foliage.position.y = 1.3;
+            tree.add(foliage);
+
+            tree.position.set(x, 0, z);
+            tree.scale.set(1.5, 1.5, 1.5);
+            scene.add(tree);
+        }
+
+        async function loadPath() {
+            try {
+                const response = await fetch('travel-phitsanulok.csv');
+                const text = await response.text();
+                const lines = text.trim().split('\n');
+                const points = [];
+
+                // Skip header
+                for (let i = 1; i < lines.length; i++) {
+                    const parts = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+                    const lat = parseFloat(parts[4]);
+                    const lon = parseFloat(parts[5]);
+                    if (!isNaN(lat)) {
+                        // Project Lat/Lon to 3D Space (X, Z) - simplified scale
+                        // We'll center it around Phrae/Phitsanulok
+                        const x = (lon - 99.5) * 500;
+                        const z = (lat - 17.5) * -500;
+                        points.push(new THREE.Vector3(x, 0, z));
+                    }
+                }
+
+                curve = new THREE.CatmullRomCurve3(points);
+
+                // Add trees along the path (subsampled)
+                for (let i = 0; i < points.length; i += 5) {
+                    const p = points[i];
+                    // Random offset for tree placement on sides
+                    const offset = (Math.random() - 0.5) * 20;
+                    createTree(p.x + offset + (offset > 0 ? 5 : -5), p.z + (Math.random() - 0.5) * 10);
+                }
+
+                document.getElementById('stats').innerText = "Journey Loaded! Moving south...";
+
+            } catch (err) {
+                console.error(err);
+                document.getElementById('stats').innerText = "Error loading path.";
+            }
+        }
+
+        function toggleCamera() {
+            followCam = !followCam;
+        }
+        window.toggleCamera = toggleCamera;
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            if (curve) {
+                progress += 0.0002; // Normal speed
+                if (progress > 1) progress = 0;
+
+                const pos = curve.getPointAt(progress);
+                const lookAt = curve.getPointAt(Math.min(progress + 0.01, 1));
+
+                train.position.copy(pos);
+                train.lookAt(lookAt);
+
+                if (followCam) {
+                    // Update camera to follow train
+                    const camOffset = new THREE.Vector3(0, 10, 20);
+                    camOffset.applyQuaternion(train.quaternion);
+                    camera.position.copy(pos).add(camOffset);
+                    camera.lookAt(pos);
+                }
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        init();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+
+</html>
