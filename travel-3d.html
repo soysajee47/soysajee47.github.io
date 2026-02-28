@@ -23,27 +23,39 @@
             top: 25px;
             left: 25px;
             z-index: 10;
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.95);
             padding: 20px 30px;
-            border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(15px);
             border: 1px solid rgba(255, 255, 255, 0.4);
-            max-width: 300px;
+            max-width: 320px;
         }
 
         .ui-overlay h1 {
             margin: 0;
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             color: #1e293b;
-            font-weight: 800;
+            font-weight: 900;
         }
 
         .ui-overlay p {
             margin: 8px 0 0;
             font-size: 0.9rem;
             color: #64748b;
-            line-height: 1.4;
+            line-height: 1.5;
+        }
+
+        .ver-tag {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: #ff4757;
+            color: white;
+            font-size: 0.6rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-weight: bold;
         }
 
         .controls {
@@ -56,20 +68,20 @@
         }
 
         button {
-            padding: 14px 28px;
-            border-radius: 12px;
+            padding: 15px 30px;
+            border-radius: 16px;
             border: none;
             background: #ff4757;
             color: white;
-            font-weight: 700;
+            font-weight: 800;
             cursor: pointer;
-            box-shadow: 0 6px 20px rgba(255, 71, 87, 0.3);
+            box-shadow: 0 8px 25px rgba(255, 71, 87, 0.4);
             transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             text-transform: uppercase;
         }
 
         button:hover {
-            transform: translateY(-4px);
+            transform: translateY(-5px);
             background: #ff6b81;
         }
 
@@ -78,12 +90,12 @@
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            font-size: 0.75rem;
-            color: #94a3b8;
-            background: rgba(255, 255, 255, 0.7);
-            padding: 4px 15px;
-            border-radius: 20px;
-            font-weight: 600;
+            font-size: 0.8rem;
+            color: #475569;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 6px 20px;
+            border-radius: 30px;
+            font-weight: 700;
         }
     </style>
 </head>
@@ -91,16 +103,17 @@
 <body>
 
     <div class="ui-overlay">
-        <h1>🚂 Colorful Express</h1>
-        <p id="status">Warming up engine...</p>
+        <div class="ver-tag">VERSION 5.1</div>
+        <h1>🚂 Colorful Northern Express</h1>
+        <p id="status">Starting engine... Please wait 3 seconds.</p>
     </div>
 
     <div class="controls">
-        <button onclick="toggleCamera()">🎥 Viewpoint</button>
+        <button onclick="toggleCamera()">🎥 Switch View</button>
     </div>
 
     <div class="footer">
-        🌊 Final Touch by <b>Soysajee Oracle</b> (The Gentle Stream)
+        🌊 Mastered by <b>Soysajee Oracle</b> (The Gentle Stream)
     </div>
 
     <div id="canvas-container"></div>
@@ -119,306 +132,220 @@
         // --- Configuration ---
         const colors = {
             sky: 0x87ceeb,
-            ground: 0x2d5a27,
+            ground: 0x386641,
             trainBody: 0xff4757, // Vibrant Red
             trainCabin: 0x1e90ff, // Bright Blue
             trainAcc: 0xffd32a, // Yellow Accent
-            trackRail: 0xbdc3c7,
-            trackWood: 0x5d4037,
             smoke: 0xffffff,
-            flower: [0xff9ff3, 0xfeca57, 0xff6b6b, 0x48dbfb, 0x1dd1a1]
+            flowers: [0xff9ff3, 0xfeca57, 0xff6b6b, 0x48dbfb, 0x1dd1a1, 0xffffff]
         };
 
         let scene, camera, renderer, train, curve;
-        let progress = 0;
-        let state = 'starting'; // 'starting' -> 'running'
-        let startTimer = 0;
-        let smokeParticles = [];
-        let followCam = true;
+        let progress = 0, state = 'starting', startTimer = 0;
+        let smokeParticles = [], followCam = true;
 
-        // --- Setup ---
+        // --- Init ---
         function init() {
             scene = new THREE.Scene();
             scene.background = new THREE.Color(colors.sky);
-            scene.fog = new THREE.Fog(colors.sky, 50, 450);
+            scene.fog = new THREE.Fog(colors.sky, 100, 500);
 
-            camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 1500);
+            camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 1, 2000);
 
             renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.shadowMap.enabled = true;
             document.getElementById('canvas-container').appendChild(renderer.domElement);
 
-            const ambient = new THREE.AmbientLight(0xffffff, 0.8);
-            scene.add(ambient);
-
-            const sun = new THREE.DirectionalLight(0xffffff, 1.3);
+            scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+            const sun = new THREE.DirectionalLight(0xffffff, 1.4);
             sun.position.set(100, 150, 50);
             sun.castShadow = true;
-            sun.shadow.mapSize.set(2048, 2048);
             scene.add(sun);
 
-            // Large Ground
             const ground = new THREE.Mesh(
-                new THREE.PlaneGeometry(8000, 8000),
+                new THREE.PlaneGeometry(10000, 10000),
                 new THREE.MeshLambertMaterial({ color: colors.ground })
             );
             ground.rotation.x = -Math.PI / 2;
             ground.receiveShadow = true;
             scene.add(ground);
 
-            createColorfulTrain();
-            loadPathAndEnvironment();
+            buildTrain();
+            loadJourneyData();
             animate();
         }
 
-        function createColorfulTrain() {
+        function buildTrain() {
             train = new THREE.Group();
+            const matBody = new THREE.MeshPhongMaterial({ color: colors.trainBody });
 
-            // Main Engine (Red)
-            const body = new THREE.Mesh(
-                new THREE.BoxGeometry(2.5, 1.8, 4),
-                new THREE.MeshPhongMaterial({ color: colors.trainBody })
-            );
-            body.position.y = 1.2;
-            body.castShadow = true;
-            train.add(body);
+            // Engine
+            const eng = new THREE.Mesh(new THREE.BoxGeometry(2.5, 1.8, 4), matBody);
+            eng.position.y = 1.2;
+            train.add(eng);
 
-            // Front Boiler (Red Cylinder)
-            const boiler = new THREE.Mesh(
-                new THREE.CylinderGeometry(0.9, 0.9, 3, 32),
-                new THREE.MeshPhongMaterial({ color: colors.trainBody })
-            );
+            const boiler = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 0.9, 3, 32), matBody);
             boiler.rotateX(Math.PI / 2);
             boiler.position.set(0, 1.5, 1.2);
             train.add(boiler);
 
             // Cabin (Blue)
-            const cabin = new THREE.Mesh(
-                new THREE.BoxGeometry(2.2, 1.5, 1.5),
-                new THREE.MeshPhongMaterial({ color: colors.trainCabin })
-            );
-            cabin.position.set(0, 2.5, -1);
-            train.add(cabin);
-
-            // Roof (Yellow)
-            const roof = new THREE.Mesh(
-                new THREE.BoxGeometry(2.5, 0.3, 2),
-                new THREE.MeshPhongMaterial({ color: colors.trainAcc })
-            );
-            roof.position.set(0, 3.3, -1);
-            train.add(roof);
+            const cab = new THREE.Mesh(new THREE.BoxGeometry(2.2, 1.6, 1.6), new THREE.MeshPhongMaterial({ color: colors.trainCabin }));
+            cab.position.set(0, 2.5, -1);
+            train.add(cab);
 
             // Chimney
-            const chimney = new THREE.Mesh(
-                new THREE.CylinderGeometry(0.3, 0.2, 1),
-                new THREE.MeshPhongMaterial({ color: 0x333333 })
-            );
-            chimney.position.set(0, 2.5, 2.5);
-            train.add(chimney);
+            const chim = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.2, 0.8), new THREE.MeshPhongMaterial({ color: 0x333 }));
+            chim.position.set(0, 2.5, 2.3);
+            train.add(chim);
 
-            // Large Lantern
-            const lantern = new THREE.Mesh(
-                new THREE.SphereGeometry(0.4, 16, 16),
-                new THREE.MeshBasicMaterial({ color: 0xffffaa })
-            );
-            lantern.position.set(0, 1.5, 2.8);
-            train.add(lantern);
+            // Light
+            const lnt = new THREE.Mesh(new THREE.SphereGeometry(0.45, 16, 16), new THREE.MeshBasicMaterial({ color: 0xffff88 }));
+            lnt.position.set(0, 1.5, 2.8);
+            train.add(lnt);
 
             scene.add(train);
         }
 
-        async function loadPathAndEnvironment() {
+        async function loadJourneyData() {
             try {
-                const response = await fetch('travel-phitsanulok.csv');
-                const text = await response.text();
-                const lines = text.trim().split('\n');
-                const points = [];
+                const res = await fetch('travel-phitsanulok.csv');
+                const csv = await res.text();
+                const lines = csv.trim().split('\n');
+                const pts = [];
 
                 for (let i = 1; i < lines.length; i++) {
-                    const row = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-                    const lat = parseFloat(row[4]), lon = parseFloat(row[5]);
+                    const r = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+                    const lat = parseFloat(r[4]), lon = parseFloat(r[5]);
                     if (!isNaN(lat)) {
-                        const x = (lon - 99.5) * 800;
-                        const z = (lat - 17.5) * -800;
-                        points.push(new THREE.Vector3(x, 0.3, z));
+                        pts.push(new THREE.Vector3((lon - 99.5) * 800, 0.4, (lat - 17.5) * -800));
                     }
                 }
 
-                curve = new THREE.CatmullRomCurve3(points);
-                buildTracks();
-                buildForest();
-                buildFlowers();
+                curve = new THREE.CatmullRomCurve3(pts);
+                const curvePts = curve.getSpacedPoints(1500);
 
-                document.getElementById('status').innerText = "🚂 Ready! Starting engine...";
-            } catch (err) {
-                console.error(err);
-                document.getElementById('status').innerText = "Load failed.";
-            }
-        }
+                // Tracks
+                const sleeperGeo = new THREE.BoxGeometry(3.5, 0.15, 0.6);
+                const woodMat = new THREE.MeshStandardMaterial({ color: 0x482307 });
+                const railsGeo = new THREE.BoxGeometry(0.15, 0.15, 3);
+                const railMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.8 });
 
-        function buildTracks() {
-            const trackPoints = curve.getSpacedPoints(1200);
-            const railGeo = new THREE.BoxGeometry(0.15, 0.15, 2);
-            const woodGeo = new THREE.BoxGeometry(3.5, 0.15, 0.6);
+                const sleeperInst = new THREE.InstancedMesh(sleeperGeo, woodMat, curvePts.length);
+                const railLInst = new THREE.InstancedMesh(railsGeo, railMat, curvePts.length);
+                const railRInst = new THREE.InstancedMesh(railsGeo, railMat, curvePts.length);
 
-            const railMat = new THREE.MeshPhongMaterial({ color: colors.trackRail, shininess: 100 });
-            const woodMat = new THREE.MeshPhongMaterial({ color: colors.trackWood });
+                const dummy = new THREE.Object3D();
+                for (let i = 0; i < curvePts.length; i++) {
+                    dummy.position.copy(curvePts[i]);
+                    dummy.lookAt(curvePts[i + 1] || curvePts[i]);
+                    dummy.updateMatrix();
+                    sleeperInst.setMatrixAt(i, dummy.matrix);
 
-            const dummy = new THREE.Object3D();
-            const sleeperMesh = new THREE.InstancedMesh(woodGeo, woodMat, trackPoints.length);
-            const railLeftMesh = new THREE.InstancedMesh(railGeo, railMat, trackPoints.length);
-            const railRightMesh = new THREE.InstancedMesh(railGeo, railMat, trackPoints.length);
+                    dummy.translateX(-0.9); dummy.position.y = 0.2; dummy.updateMatrix();
+                    railLInst.setMatrixAt(i, dummy.matrix);
 
-            for (let i = 0; i < trackPoints.length; i++) {
-                dummy.position.copy(trackPoints[i]);
-                dummy.lookAt(trackPoints[i + 1] || trackPoints[i]);
+                    dummy.translateX(1.8); dummy.updateMatrix();
+                    railRInst.setMatrixAt(i, dummy.matrix);
+                    dummy.position.y = 0;
+                }
+                scene.add(sleeperInst, railLInst, railRInst);
 
-                // Sleeper
-                dummy.updateMatrix();
-                sleeperMesh.setMatrixAt(i, dummy.matrix);
+                // Environment: Forest & Flowers
+                const forestGeo = new THREE.ConeGeometry(2, 6, 8);
+                const forestMat = new THREE.MeshLambertMaterial({ color: 0x1b4332 });
+                const trees = new THREE.InstancedMesh(forestGeo, forestMat, 5000);
 
-                // Rail Left
-                dummy.translateX(-0.9);
-                dummy.position.y = 0.2;
-                dummy.updateMatrix();
-                railLeftMesh.setMatrixAt(i, dummy.matrix);
+                const flowerGeo = new THREE.SphereGeometry(0.4, 6, 6);
+                const flowers = colors.flowers.map(c => new THREE.InstancedMesh(flowerGeo, new THREE.MeshLambertMaterial({ color: c }), 1500));
 
-                // Rail Right
-                dummy.translateX(1.8);
-                dummy.updateMatrix();
-                railRightMesh.setMatrixAt(i, dummy.matrix);
-
-                dummy.position.y = 0; // reset
-            }
-            scene.add(sleeperMesh, railLeftMesh, railRightMesh);
-        }
-
-        function buildForest() {
-            const treeCount = 4500;
-            const treeGeo = new THREE.ConeGeometry(1.6, 6, 8);
-            const treeMat = new THREE.MeshLambertMaterial({ color: 0x15803d });
-            const instancedTrees = new THREE.InstancedMesh(treeGeo, treeMat, treeCount);
-
-            const dummy = new THREE.Object3D();
-            for (let i = 0; i < treeCount; i++) {
-                const t = Math.random();
-                const p = curve.getPointAt(t);
-                const dir = curve.getTangentAt(t);
-                const side = new THREE.Vector3(-dir.z, 0, dir.x);
-                const dist = (10 + Math.random() * 80) * (Math.random() > 0.5 ? 1 : -1);
-
-                dummy.position.set(p.x + side.x * dist + (Math.random() - 0.5) * 15, 3, p.z + side.z * dist + (Math.random() - 0.5) * 15);
-                dummy.scale.setScalar(0.7 + Math.random() * 1.5);
-                dummy.rotation.y = Math.random() * Math.PI;
-                dummy.updateMatrix();
-                instancedTrees.setMatrixAt(i, dummy.matrix);
-            }
-            scene.add(instancedTrees);
-        }
-
-        function buildFlowers() {
-            const flowerCount = 8000;
-            const flowerGeo = new THREE.SphereGeometry(0.3, 6, 6);
-
-            const dummy = new THREE.Object3D();
-
-            // Multiple instances for different flower colors
-            colors.flower.forEach(color => {
-                const mat = new THREE.MeshLambertMaterial({ color: color });
-                const count = Math.floor(flowerCount / colors.flower.length);
-                const mesh = new THREE.InstancedMesh(flowerGeo, mat, count);
-
-                for (let i = 0; i < count; i++) {
+                for (let i = 0; i < 5000; i++) {
                     const t = Math.random();
                     const p = curve.getPointAt(t);
-                    const dir = curve.getTangentAt(t);
-                    const side = new THREE.Vector3(-dir.z, 0, dir.x);
-                    const dist = (3 + Math.random() * 20) * (Math.random() > 0.5 ? 1 : -1);
-
-                    dummy.position.set(p.x + side.x * dist + (Math.random() - 0.5) * 5, 0.4, p.z + side.z * dist + (Math.random() - 0.5) * 5);
+                    const tan = curve.getTangentAt(t);
+                    const per = new THREE.Vector3(-tan.z, 0, tan.x);
+                    const dist = (12 + Math.random() * 80) * (Math.random() > 0.5 ? 1 : -1);
+                    dummy.position.set(p.x + per.x * dist, 3, p.z + per.z * dist);
+                    dummy.scale.setScalar(0.8 + Math.random());
                     dummy.updateMatrix();
-                    mesh.setMatrixAt(i, dummy.matrix);
+                    trees.setMatrixAt(i, dummy.matrix);
                 }
-                scene.add(mesh);
-            });
+                scene.add(trees);
+
+                flowers.forEach(mesh => {
+                    for (let i = 0; i < 1500; i++) {
+                        const t = Math.random();
+                        const p = curve.getPointAt(t);
+                        const tan = curve.getTangentAt(t);
+                        const per = new THREE.Vector3(-tan.z, 0, tan.x);
+                        const dist = (4 + Math.random() * 15) * (Math.random() > 0.5 ? 1 : -1);
+                        dummy.position.set(p.x + per.x * dist + (Math.random() - 0.5) * 10, 0.4, p.z + per.z * dist + (Math.random() - 0.5) * 10);
+                        dummy.updateMatrix();
+                        mesh.setMatrixAt(i, dummy.matrix);
+                    }
+                    scene.add(mesh);
+                });
+
+                document.getElementById('status').innerText = "🚂 Ready! Starting now...";
+            } catch (e) { document.getElementById('status').innerText = "Load failed."; }
         }
 
-        function spawnSmoke() {
+        function createSmoke() {
             if (!train) return;
-            const smoke = new THREE.Mesh(
-                new THREE.SphereGeometry(0.3, 8, 8),
-                new THREE.MeshBasicMaterial({ color: colors.smoke, transparent: true, opacity: 0.6 })
-            );
-            const pos = new THREE.Vector3(0, 3.5, 2.5);
-            pos.applyQuaternion(train.quaternion);
-            smoke.position.copy(train.position).add(pos);
-            smoke.userData = { life: 1.0, size: 0.3 };
-            scene.add(smoke);
-            smokeParticles.push(smoke);
+            const s = new THREE.Mesh(new THREE.SphereGeometry(0.35, 8, 8), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.6 }));
+            const p = new THREE.Vector3(0, 3.5, 2.3);
+            p.applyQuaternion(train.quaternion);
+            s.position.copy(train.position).add(p);
+            s.userData = { life: 1, s: 0.4 };
+            scene.add(s);
+            smokeParticles.push(s);
         }
 
         window.toggleCamera = () => { followCam = !followCam; };
 
         function animate() {
             requestAnimationFrame(animate);
-
             if (curve) {
                 if (state === 'starting') {
                     startTimer += 0.01;
-                    train.position.y = 0.3 + Math.sin(Date.now() * 0.05) * 0.06; // Startup shake
-                    if (Math.random() > 0.5) spawnSmoke();
-
-                    const startPos = curve.getPointAt(0);
-                    const lookInit = curve.getPointAt(0.01);
-                    train.position.copy(startPos);
-                    train.lookAt(lookInit);
-                    // CRITICAL FIX: The Three.js lookAt faces the -Z axis of the group. 
-                    // Our model's "forward" (lantern/chimney) is at +Z.
-                    // So we DON'T rotateY(PI) here if we want +Z to lead.
-                    // If it was running backward, it means lookAt was correct but model orientation was flipped.
-                    // Let's ensure lookAt works and model faces FRONT.
-
+                    train.position.copy(curve.getPointAt(0));
+                    train.lookAt(curve.getPointAt(0.01));
+                    train.rotateY(Math.PI); // Flipped forward!
+                    train.position.y = 0.4 + Math.sin(Date.now() * 0.08) * 0.06;
+                    if (Math.random() > 0.3) createSmoke();
                     if (startTimer > 3) {
                         state = 'running';
-                        document.getElementById('status').innerText = "🚂 Final Express Running!";
+                        document.getElementById('status').innerText = "🛤️ Heading to Phitsanulok...";
                     }
                 } else {
                     progress += 0.0003;
                     if (progress > 1) progress = 0;
-
-                    const pos = curve.getPointAt(progress);
+                    const p = curve.getPointAt(progress);
                     const ahead = curve.getPointAt(Math.min(progress + 0.005, 1));
-                    train.position.copy(pos);
+                    train.position.copy(p);
                     train.lookAt(ahead);
-                    // Removing rotateY(Math.PI) to let the +Z axis (Engine/Chimney) lead the way.
+                    train.rotateY(Math.PI); // Flipped forward!
+                    if (Math.random() > 0.7) createSmoke();
                 }
 
-                // Particle Update
-                for (let i = smokeParticles.length - 1; i >= 0; i--) {
-                    const s = smokeParticles[i];
+                smokeParticles.forEach((s, i) => {
                     s.userData.life -= 0.01;
-                    s.position.y += 0.1;
-                    s.userData.size += 0.03;
-                    s.scale.setScalar(s.userData.size);
+                    s.position.y += 0.12;
+                    s.userData.s += 0.03;
+                    s.scale.setScalar(s.userData.s);
                     s.material.opacity = s.userData.life;
-                    if (s.userData.life <= 0) {
-                        scene.remove(s);
-                        smokeParticles.splice(i, 1);
-                    }
-                }
+                    if (s.userData.life <= 0) { scene.remove(s); smokeParticles.splice(i, 1); }
+                });
 
                 if (followCam) {
-                    const camOffset = new THREE.Vector3(25, 20, -35); // Classic follow view
-                    camOffset.applyQuaternion(train.quaternion);
-                    camera.position.lerp(new THREE.Vector3().copy(train.position).add(camOffset), 0.1);
-                    camera.lookAt(train.position.x, train.position.y + 2, train.position.z);
+                    const off = new THREE.Vector3(30, 25, -45).applyQuaternion(train.quaternion);
+                    camera.position.lerp(new THREE.Vector3().copy(train.position).add(off), 0.1);
+                    camera.lookAt(train.position.x, train.position.y + 3, train.position.z);
                 }
             }
-
             renderer.render(scene, camera);
         }
-
         init();
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
