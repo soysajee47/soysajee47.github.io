@@ -105,6 +105,15 @@
             border-top: 1px solid #30363d;
             margin: 8px 0;
         }
+
+        .custom-label {
+            background: rgba(13, 17, 23, 0.9) !important;
+            border: 1px solid var(--accent-color) !important;
+            color: var(--accent-color) !important;
+            border-radius: 4px !important;
+            font-weight: 600 !important;
+            box-shadow: 0 0 10px rgba(88, 166, 255, 0.3) !important;
+        }
     </style>
 </head>
 
@@ -170,6 +179,14 @@
                             opacity: 1,
                             fillOpacity: 0.8
                         }).addTo(map);
+
+                        if (isStart || isEnd) {
+                            marker.bindTooltip(isStart ? "🚩 START: Chiang Mai" : "🏁 END: Phitsanulok", {
+                                permanent: true,
+                                direction: 'top',
+                                className: 'custom-label'
+                            }).openTooltip();
+                        }
 
                         marker.bindPopup(`
                             <div class="popup-card">

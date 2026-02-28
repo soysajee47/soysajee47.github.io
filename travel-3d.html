@@ -106,9 +106,9 @@
 <body>
 
     <div class="ui-overlay">
-        <div class="ver-tag">V6.3 - GENTLE FOREST</div>
+        <div class="ver-tag">V6.5 - LIVE MOTION</div>
         <h1>🚂 Colorful Northern Express</h1>
-        <p id="status">Refined Forest Density & Gentle Smoke emission.</p>
+        <p id="status">Speed recalibrated. Smooth journey enabled.</p>
     </div>
 
     <div class="controls">
@@ -146,6 +146,11 @@
         let scene, camera, renderer, train, curve;
         let progress = 0, state = 'starting', startTimer = 0;
         let smokeParticles = [], followCam = true;
+
+        // Expose to window for UI buttons and debugging
+        window.state = state;
+        window.progress = progress;
+        window.toggleCamera = () => { followCam = !followCam; };
 
         function init() {
             scene = new THREE.Scene();
@@ -305,8 +310,6 @@
             smokeParticles.push(s);
         }
 
-        window.toggleCamera = () => { followCam = !followCam; };
-
         function animate() {
             requestAnimationFrame(animate);
             if (curve) {
@@ -322,7 +325,8 @@
                         document.getElementById('status').innerText = "🛤️ Enjoy the journey...";
                     }
                 } else {
-                    progress += 0.0001;
+                    progress += 0.0005;
+                    window.progress = progress;
                     if (progress > 1) progress = 0;
                     const p = curve.getPointAt(progress);
                     const ahead = curve.getPointAt(Math.min(progress + 0.005, 1));
