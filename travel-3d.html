@@ -96,6 +96,9 @@
             padding: 6px 20px;
             border-radius: 30px;
             font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
     </style>
 </head>
@@ -103,17 +106,17 @@
 <body>
 
     <div class="ui-overlay">
-        <div class="ver-tag">RESTORED V5.3</div>
+        <div class="ver-tag">CLASSIC V5.1</div>
         <h1>🚂 Colorful Northern Express</h1>
-        <p id="status">Engine restored. Back to the journey you love.</p>
+        <p id="status">Journey restored. The houses have been removed as requested.</p>
     </div>
 
     <div class="controls">
-        <button onclick="toggleCamera()">🎥 Toggle View</button>
+        <button onclick="toggleCamera()">🎥 VIEWPOINT</button>
     </div>
 
     <div class="footer">
-        🌊 Reverted to Classic by <b>Soysajee Oracle</b>
+        🌊 Final Touch by <b>Soysajee Oracle</b> (The Gentle Stream)
     </div>
 
     <div id="canvas-container"></div>
@@ -250,10 +253,12 @@
                 }
                 scene.add(sleeperInst, railLInst, railRInst);
 
+                // Trees: Tall Cones (V5.1 Style)
                 const forestGeo = new THREE.ConeGeometry(2.5, 12, 8);
                 const forestMat = new THREE.MeshLambertMaterial({ color: 0x064e3b });
                 const trees = new THREE.InstancedMesh(forestGeo, forestMat, 5000);
 
+                // Flowers: Massive spheres field
                 const flowerGeo = new THREE.SphereGeometry(0.4, 6, 6);
                 const flowerMeshes = colors.flowers.map(c => new THREE.InstancedMesh(flowerGeo, new THREE.MeshLambertMaterial({ color: c }), 2000));
 
