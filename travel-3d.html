@@ -106,9 +106,9 @@
 <body>
 
     <div class="ui-overlay">
-        <div class="ver-tag">ULTRA-DEFINITIVE V6.0</div>
+        <div class="ver-tag">ULTRA-MINI TREES V6.2</div>
         <h1>🚂 Colorful Northern Express</h1>
-        <p id="status">Classic Orientation & Speed Restored. Trees re-scaled.</p>
+        <p id="status">Radical Tree Reset. Mini scale enabled.</p>
     </div>
 
     <div class="controls">
@@ -269,7 +269,7 @@
                     const per = new THREE.Vector3(-tan.z, 0, tan.x);
                     const dist = (15 + Math.random() * 100) * (Math.random() > 0.5 ? 1 : -1);
                     dummy.position.set(p.x + per.x * dist, 7, p.z + per.z * dist);
-                    dummy.scale.setScalar(0.8 + Math.random() * 1.5);
+                    dummy.scale.setScalar(0.25 + Math.random() * 0.45);
                     dummy.rotation.y = Math.random() * Math.PI;
                     dummy.updateMatrix();
                     trees.setMatrixAt(i, dummy.matrix);
