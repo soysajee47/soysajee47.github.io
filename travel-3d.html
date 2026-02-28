@@ -106,9 +106,9 @@
 <body>
 
     <div class="ui-overlay">
-        <div class="ver-tag">ULTRA-RESTORE V5.1-FINAL</div>
+        <div class="ver-tag">ULTRA-DEFINITIVE V6.0</div>
         <h1>🚂 Colorful Northern Express</h1>
-        <p id="status">Classic Journey Restored. Houses Permanentely Removed.</p>
+        <p id="status">Classic Orientation & Speed Restored. Trees re-scaled.</p>
     </div>
 
     <div class="controls">
@@ -269,7 +269,7 @@
                     const per = new THREE.Vector3(-tan.z, 0, tan.x);
                     const dist = (15 + Math.random() * 100) * (Math.random() > 0.5 ? 1 : -1);
                     dummy.position.set(p.x + per.x * dist, 7, p.z + per.z * dist);
-                    dummy.scale.setScalar(1.5 + Math.random() * 2.5);
+                    dummy.scale.setScalar(0.8 + Math.random() * 1.5);
                     dummy.rotation.y = Math.random() * Math.PI;
                     dummy.updateMatrix();
                     trees.setMatrixAt(i, dummy.matrix);
@@ -314,7 +314,6 @@
                     startTimer += 0.01;
                     train.position.copy(curve.getPointAt(0));
                     train.lookAt(curve.getPointAt(0.01));
-                    train.rotateY(Math.PI);
                     train.position.y = 0.4 + Math.sin(Date.now() * 0.06) * 0.08;
                     if (Math.random() > 0.2) createSmoke();
 
@@ -323,13 +322,12 @@
                         document.getElementById('status').innerText = "🛤️ Enjoy the journey...";
                     }
                 } else {
-                    progress += 0.0002;
+                    progress += 0.0001;
                     if (progress > 1) progress = 0;
                     const p = curve.getPointAt(progress);
                     const ahead = curve.getPointAt(Math.min(progress + 0.005, 1));
                     train.position.copy(p);
                     train.lookAt(ahead);
-                    train.rotateY(Math.PI);
                     if (Math.random() > 0.45) createSmoke();
                 }
 
