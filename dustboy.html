@@ -194,7 +194,7 @@
 
             <div class="stat-group">
                 <div class="card">
-                    <div class="ver-chip">V1.1 (PATCHED)</div>
+                    <div class="ver-chip">V1.2 (ULTRA-PATCH)</div>
                     <div class="label">Particulate Matter 2.5</div>
                     <div class="value" id="pm25">--<span class="unit">µg/m³</span></div>
                 </div>
@@ -224,8 +224,8 @@
         <div class="card status-terminal">
             <div class="label">Network Feed <span class="badge">LIVE MQTT</span></div>
             <div class="status-log" id="log-container">
-                <div class="log-entry">Booting DustBoy Oracle V1.1...</div>
-                <div class="log-entry">Scanning multi-version protocols...</div>
+                <div class="log-entry">Booting DustBoy Oracle V1.2...</div>
+                <div class="log-entry">Deep-mapping all sensor models...</div>
             </div>
         </div>
     </div>
@@ -241,7 +241,6 @@
     <script type="module">
         import * as THREE from 'three';
 
-        // --- Three.js Background ---
         let scene, camera, renderer, globe, particles;
         const colorScale = {
             safe: new THREE.Color(0x39ff14),
@@ -310,7 +309,6 @@
             renderer.render(scene, camera);
         }
 
-        // --- MQTT Connection ---
         function initMQTT() {
             const client = mqtt.connect('wss://dustboy-wss-bridge.laris.workers.dev/mqtt');
             const logContainer = document.getElementById('log-container');
@@ -341,14 +339,14 @@
         }
 
         function extractData(data) {
-            // Support multiple DustBoy formats (V2, V3, V4, V5)
-            const d = data.d || {};
+            // Priority: Nested 'd' object (Model-N/Versions 4-5) > Top level (Model-T)
+            const d = data.d || data;
             return {
-                name: data.nickname || data.id || "Unknown Sensor",
-                pm25: data.pm25 ?? data.log_pm25 ?? d.pm2_5 ?? d.pm25 ?? "--",
-                pm10: data.pm10 ?? data.log_pm10 ?? d.pm10 ?? "--",
-                temp: data.temp ?? data.log_temp ?? d.temp ?? d.temperature ?? "--",
-                hum: data.hum ?? data.log_hum ?? d.humid ?? d.humidity ?? "--"
+                name: d.nickname || d.id || d.myName || "Unknown Sensor",
+                pm25: d.pm2_5 ?? d.pm25 ?? d.log_pm25 ?? "--",
+                pm10: d.pm10 ?? d.log_pm10 ?? "--",
+                temp: d.temperature_c ?? d.temp_c ?? d.temp ?? d.temperature ?? d.log_temp ?? "--",
+                hum: d.humidity_rh ?? d.humid_rh ?? d.humid ?? d.humidity ?? d.hum ?? d.log_hum ?? "--"
             };
         }
 
