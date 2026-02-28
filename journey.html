@@ -50,13 +50,13 @@
             position: absolute;
             top: 10px;
             right: 15px;
-            background: #e74c3c;
+            background: #27ae60;
             color: white;
             font-size: 0.7rem;
             padding: 3px 10px;
             border-radius: 12px;
             font-weight: bold;
-            box-shadow: 0 4px 10px rgba(231, 76, 60, 0.4);
+            box-shadow: 0 4px 10px rgba(39, 174, 96, 0.4);
         }
 
         .controls {
@@ -104,7 +104,7 @@
 <body>
 
     <div class="ui-overlay">
-        <div class="ver-tag">DEFINITIVE V6.0</div>
+        <div class="ver-tag">REFINED V6.1</div>
         <h1>🚂 Journey to Phitsanulok</h1>
         <p id="status">Starting steam engine... Warmup in progress (3s).</p>
     </div>
@@ -258,41 +258,41 @@
             }
             scene.add(sleeperMesh, railLMesh, railRMesh);
 
-            // Forests (Tall Trees)
-            const forestMat = new THREE.MeshLambertMaterial({ color: 0x064e3b });
-            const trees = new THREE.InstancedMesh(new THREE.ConeGeometry(3.5, 18, 8), forestMat, 5000);
+            // Forests (Normal Sized Trees)
+            const forestMat = new THREE.MeshLambertMaterial({ color: 0x1b4332 });
+            const trees = new THREE.InstancedMesh(new THREE.ConeGeometry(2, 8, 8), forestMat, 5000);
             for (let i = 0; i < 5000; i++) {
                 const t = Math.random();
                 const p = curve.getPointAt(t);
                 const tan = curve.getTangentAt(t);
                 const per = new THREE.Vector3(-tan.z, 0, tan.x);
-                const dist = (22 + Math.random() * 120) * (Math.random() > 0.5 ? 1 : -1);
-                dummy.position.set(p.x + per.x * dist, 9, p.z + per.z * dist);
-                dummy.scale.setScalar(1.8 + Math.random() * 3.5);
+                const dist = (18 + Math.random() * 100) * (Math.random() > 0.5 ? 1 : -1);
+                dummy.position.set(p.x + per.x * dist, 4, p.z + per.z * dist);
+                dummy.scale.setScalar(0.7 + Math.random() * 1.5);
                 dummy.rotation.y = Math.random() * Math.PI;
                 dummy.updateMatrix();
                 trees.setMatrixAt(i, dummy.matrix);
             }
             scene.add(trees);
 
-            // High Density Huts (250 houses)
-            const hutCount = 250;
-            const hutsBase = new THREE.InstancedMesh(new THREE.BoxGeometry(6, 4.5, 7), new THREE.MeshLambertMaterial({ color: colors.hutBody }), hutCount);
-            const hutsRoof = new THREE.InstancedMesh(new THREE.BoxGeometry(7, 4, 8), new THREE.MeshLambertMaterial({ color: colors.hutRoof }), hutCount);
+            // High Density Huts (300 houses)
+            const hutCount = 300;
+            const hutsBase = new THREE.InstancedMesh(new THREE.BoxGeometry(5, 3.5, 6), new THREE.MeshLambertMaterial({ color: colors.hutBody }), hutCount);
+            const hutsRoof = new THREE.InstancedMesh(new THREE.BoxGeometry(6, 3, 7), new THREE.MeshLambertMaterial({ color: colors.hutRoof }), hutCount);
 
             for (let i = 0; i < hutCount; i++) {
                 const t = Math.random();
                 const p = curve.getPointAt(t);
                 const tan = curve.getTangentAt(t);
                 const per = new THREE.Vector3(-tan.z, 0, tan.x);
-                const dist = (18 + Math.random() * 40) * (Math.random() > 0.5 ? 1 : -1);
+                const dist = (15 + Math.random() * 35) * (Math.random() > 0.5 ? 1 : -1);
 
-                dummy.position.set(p.x + per.x * dist, 2.2, p.z + per.z * dist);
-                dummy.lookAt(p.x, 2.2, p.z);
+                dummy.position.set(p.x + per.x * dist, 1.8, p.z + per.z * dist);
+                dummy.lookAt(p.x, 1.8, p.z);
                 dummy.updateMatrix();
                 hutsBase.setMatrixAt(i, dummy.matrix);
 
-                dummy.position.y = 5.5;
+                dummy.position.y = 4.5;
                 dummy.rotation.x = Math.PI / 4;
                 dummy.updateMatrix();
                 hutsRoof.setMatrixAt(i, dummy.matrix);
@@ -302,30 +302,30 @@
 
             // Flowers
             colors.flowers.forEach(c => {
-                const mesh = new THREE.InstancedMesh(new THREE.SphereGeometry(0.5, 6, 6), new THREE.MeshLambertMaterial({ color: c }), 2000);
+                const mesh = new THREE.InstancedMesh(new THREE.SphereGeometry(0.4, 6, 6), new THREE.MeshLambertMaterial({ color: c }), 2000);
                 for (let i = 0; i < 2000; i++) {
                     const t = Math.random();
                     const p = curve.getPointAt(t);
                     const tan = curve.getTangentAt(t);
                     const per = new THREE.Vector3(-tan.z, 0, tan.x);
-                    const dist = (6 + Math.random() * 25) * (Math.random() > 0.5 ? 1 : -1);
-                    dummy.position.set(p.x + per.x * dist + (Math.random() - 0.5) * 15, 0.4, p.z + per.z * dist + (Math.random() - 0.5) * 15);
+                    const dist = (6 + Math.random() * 20) * (Math.random() > 0.5 ? 1 : -1);
+                    dummy.position.set(p.x + per.x * dist + (Math.random() - 0.5) * 12, 0.3, p.z + per.z * dist + (Math.random() - 0.5) * 12);
                     dummy.updateMatrix();
                     mesh.setMatrixAt(i, dummy.matrix);
                 }
                 scene.add(mesh);
             });
 
-            document.getElementById('status').innerText = "🚂 Ready! Steam engine active (V6.0).";
+            document.getElementById('status').innerText = "🚂 Ready! Atmospheric Journey V6.1 active.";
         }
 
         function createSmoke() {
             if (!train) return;
-            const s = new THREE.Mesh(new THREE.SphereGeometry(0.5, 8, 8), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.8 }));
-            const p = new THREE.Vector3(0, 3.8, 2.5);
+            const s = new THREE.Mesh(new THREE.SphereGeometry(0.45, 8, 8), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.8 }));
+            const p = new THREE.Vector3(0, 3.6, 2.5);
             p.applyQuaternion(train.quaternion);
             s.position.copy(train.position).add(p);
-            s.userData = { life: 1, s: 0.6 };
+            s.userData = { life: 1, s: 0.5 };
             scene.add(s);
             smokeParticles.push(s);
         }
@@ -339,14 +339,14 @@
                     startTimer += 0.01;
                     train.position.copy(curve.getPointAt(0));
                     train.lookAt(curve.getPointAt(0.01));
-                    train.position.y = 0.4 + Math.sin(Date.now() * 0.06) * 0.1;
+                    train.position.y = 0.4 + Math.sin(Date.now() * 0.06) * 0.08;
                     if (Math.random() > 0.1) createSmoke();
                     if (startTimer > 3) {
                         state = 'running';
                         document.getElementById('status').innerText = "🛤️ Slower Relaxing Journey...";
                     }
                 } else {
-                    progress += 0.0001; // EXTREMELY SLOWER SPEED
+                    progress += 0.00007; // FURTHER REDUCED SPEED
                     if (progress > 1) progress = 0;
                     const p = curve.getPointAt(progress);
                     const ahead = curve.getPointAt(Math.min(progress + 0.005, 1));
@@ -357,18 +357,18 @@
 
                 smokeParticles.forEach((s, i) => {
                     s.userData.life -= 0.007;
-                    s.position.y += 0.15;
-                    s.userData.s += 0.06;
+                    s.position.y += 0.12;
+                    s.userData.s += 0.05;
                     s.scale.setScalar(s.userData.s);
                     s.material.opacity = s.userData.life;
                     if (s.userData.life <= 0) { scene.remove(s); smokeParticles.splice(i, 1); }
                 });
 
                 if (followCam) {
-                    // HARD LOCKED CAMERA (Zero zooming during turns)
-                    const offset = new THREE.Vector3(30, 25, -50).applyQuaternion(train.quaternion);
-                    camera.position.copy(train.position).add(offset); // No lerp = No zooming/lag
-                    camera.lookAt(train.position.x, train.position.y + 4, train.position.z);
+                    // HARD LOCKED CAMERA (Closer Follow)
+                    const offset = new THREE.Vector3(25, 18, -40).applyQuaternion(train.quaternion);
+                    camera.position.copy(train.position).add(offset);
+                    camera.lookAt(train.position.x, train.position.y + 3, train.position.z);
                 }
             }
             renderer.render(scene, camera);
