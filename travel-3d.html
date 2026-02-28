@@ -50,7 +50,7 @@
             position: absolute;
             top: 10px;
             right: 15px;
-            background: #e67e22;
+            background: #9b59b6;
             color: white;
             font-size: 0.6rem;
             padding: 2px 8px;
@@ -103,17 +103,17 @@
 <body>
 
     <div class="ui-overlay">
-        <div class="ver-tag">VERSION 5.3</div>
+        <div class="ver-tag">VERSION 5.4</div>
         <h1>🚂 Colorful Northern Express</h1>
-        <p id="status">Starting engine... Get ready.</p>
+        <p id="status">Starting engine...</p>
     </div>
 
     <div class="controls">
-        <button onclick="toggleCamera()">🎥 Toggle View</button>
+        <button onclick="toggleCamera()">🎥 Viewpoint</button>
     </div>
 
     <div class="footer">
-        🌊 Atmospheric Build by <b>Soysajee Oracle</b> (The Gentle Stream)
+        🌊 Rural Scenery by <b>Soysajee Oracle</b> (The Gentle Stream)
     </div>
 
     <div id="canvas-container"></div>
@@ -137,6 +137,8 @@
             trainCabin: 0x1e90ff,
             trainAcc: 0xffd32a,
             smoke: 0xffffff,
+            hutBody: 0xd2b48c, // Tan/Wood
+            hutRoof: 0x8b4513, // Brown
             flowers: [0xff9ff3, 0xfeca57, 0xff6b6b, 0x48dbfb, 0x1dd1a1, 0xffffff]
         };
 
@@ -192,17 +194,13 @@
             cab.position.set(0, 2.5, -1);
             train.add(cab);
 
-            const roof = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.3, 2), new THREE.MeshPhongMaterial({ color: colors.trainAcc }));
-            roof.position.set(0, 3.3, -1);
-            train.add(roof);
+            const chimney = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.2, 0.8), new THREE.MeshPhongMaterial({ color: 0x333 }));
+            chimney.position.set(0, 2.5, 2.3);
+            train.add(chimney);
 
-            const chim = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.2, 0.8), new THREE.MeshPhongMaterial({ color: 0x333 }));
-            chim.position.set(0, 2.5, 2.3);
-            train.add(chim);
-
-            const lnt = new THREE.Mesh(new THREE.SphereGeometry(0.45, 16, 16), new THREE.MeshBasicMaterial({ color: 0xffff88 }));
-            lnt.position.set(0, 1.5, 2.8);
-            train.add(lnt);
+            const light = new THREE.Mesh(new THREE.SphereGeometry(0.45, 16, 16), new THREE.MeshBasicMaterial({ color: 0xffff88 }));
+            light.position.set(0, 1.5, 2.8);
+            train.add(light);
 
             scene.add(train);
         }
@@ -223,75 +221,104 @@
                 }
 
                 curve = new THREE.CatmullRomCurve3(pts);
-                const curvePts = curve.getSpacedPoints(1500);
 
-                const sleeperGeo = new THREE.BoxGeometry(3.5, 0.15, 0.6);
-                const woodMat = new THREE.MeshStandardMaterial({ color: 0x482307 });
-                const railsGeo = new THREE.BoxGeometry(0.15, 0.15, 3);
-                const railMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.9 });
-
-                const sleeperInst = new THREE.InstancedMesh(sleeperGeo, woodMat, curvePts.length);
-                const railLInst = new THREE.InstancedMesh(railsGeo, railMat, curvePts.length);
-                const railRInst = new THREE.InstancedMesh(railsGeo, railMat, curvePts.length);
-
-                const dummy = new THREE.Object3D();
-                for (let i = 0; i < curvePts.length; i++) {
-                    dummy.position.copy(curvePts[i]);
-                    dummy.lookAt(curvePts[i + 1] || curvePts[i]);
-                    dummy.updateMatrix();
-                    sleeperInst.setMatrixAt(i, dummy.matrix);
-
-                    dummy.translateX(-0.9); dummy.position.y = 0.2; dummy.updateMatrix();
-                    railLInst.setMatrixAt(i, dummy.matrix);
-
-                    dummy.translateX(1.8); dummy.updateMatrix();
-                    railRInst.setMatrixAt(i, dummy.matrix);
-                    dummy.position.y = 0;
-                }
-                scene.add(sleeperInst, railLInst, railRInst);
-
-                const forestGeo = new THREE.ConeGeometry(3, 15, 8); // Even taller trees
-                const forestMat = new THREE.MeshLambertMaterial({ color: 0x064e3b });
-                const trees = new THREE.InstancedMesh(forestGeo, forestMat, 5000);
-
-                const flowerGeo = new THREE.SphereGeometry(0.4, 6, 6);
-                const flowerMeshes = colors.flowers.map(c => new THREE.InstancedMesh(flowerGeo, new THREE.MeshLambertMaterial({ color: c }), 2000));
-
-                for (let i = 0; i < 5000; i++) {
-                    const t = Math.random();
-                    const p = curve.getPointAt(t);
-                    const tan = curve.getTangentAt(t);
-                    const per = new THREE.Vector3(-tan.z, 0, tan.x);
-                    const dist = (15 + Math.random() * 100) * (Math.random() > 0.5 ? 1 : -1);
-                    dummy.position.set(p.x + per.x * dist, 7, p.z + per.z * dist);
-                    dummy.scale.setScalar(1.5 + Math.random() * 2.5);
-                    dummy.rotation.y = Math.random() * Math.PI;
-                    dummy.updateMatrix();
-                    trees.setMatrixAt(i, dummy.matrix);
-                }
-                scene.add(trees);
-
-                flowerMeshes.forEach(mesh => {
-                    for (let i = 0; i < 2000; i++) {
-                        const t = Math.random();
-                        const p = curve.getPointAt(t);
-                        const tan = curve.getTangentAt(t);
-                        const per = new THREE.Vector3(-tan.z, 0, tan.x);
-                        const dist = (4 + Math.random() * 25) * (Math.random() > 0.5 ? 1 : -1);
-                        dummy.position.set(p.x + per.x * dist + (Math.random() - 0.5) * 15, 0.4, p.z + per.z * dist + (Math.random() - 0.5) * 15);
-                        dummy.updateMatrix();
-                        mesh.setMatrixAt(i, dummy.matrix);
-                    }
-                    scene.add(mesh);
-                });
-
+                buildEnvironment();
                 document.getElementById('status').innerText = "🚂 Ready! Steam engine active.";
             } catch (e) { document.getElementById('status').innerText = "Load failed."; }
         }
 
+        function buildEnvironment() {
+            const curvePts = curve.getSpacedPoints(1500);
+
+            // 1. Tracks (Sleepers & Rails)
+            const woodMat = new THREE.MeshStandardMaterial({ color: 0x482307 });
+            const railMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.9 });
+            const sleeperMesh = new THREE.InstancedMesh(new THREE.BoxGeometry(3.5, 0.15, 0.6), woodMat, curvePts.length);
+            const railLMesh = new THREE.InstancedMesh(new THREE.BoxGeometry(0.15, 0.15, 3), railMat, curvePts.length);
+            const railRMesh = new THREE.InstancedMesh(new THREE.BoxGeometry(0.15, 0.15, 3), railMat, curvePts.length);
+
+            const dummy = new THREE.Object3D();
+            for (let i = 0; i < curvePts.length; i++) {
+                dummy.position.copy(curvePts[i]);
+                dummy.lookAt(curvePts[i + 1] || curvePts[i]);
+                dummy.updateMatrix();
+                sleeperMesh.setMatrixAt(i, dummy.matrix);
+                dummy.translateX(-0.9); dummy.position.y = 0.2; dummy.updateMatrix();
+                railLMesh.setMatrixAt(i, dummy.matrix);
+                dummy.translateX(1.8); dummy.updateMatrix();
+                railRMesh.setMatrixAt(i, dummy.matrix);
+                dummy.position.y = 0;
+            }
+            scene.add(sleeperMesh, railLMesh, railRMesh);
+
+            // 2. Forests (Tall Trees)
+            const forestGeo = new THREE.ConeGeometry(3, 16, 8);
+            const forestMat = new THREE.MeshLambertMaterial({ color: 0x064e3b });
+            const trees = new THREE.InstancedMesh(forestGeo, forestMat, 4000);
+            for (let i = 0; i < 4000; i++) {
+                const t = Math.random();
+                const p = curve.getPointAt(t);
+                const tan = curve.getTangentAt(t);
+                const per = new THREE.Vector3(-tan.z, 0, tan.x);
+                const dist = (18 + Math.random() * 100) * (Math.random() > 0.5 ? 1 : -1);
+                dummy.position.set(p.x + per.x * dist, 8, p.z + per.z * dist);
+                dummy.scale.setScalar(1.5 + Math.random() * 2.5);
+                dummy.rotation.y = Math.random() * Math.PI;
+                dummy.updateMatrix();
+                trees.setMatrixAt(i, dummy.matrix);
+            }
+            scene.add(trees);
+
+            // 3. Rural Huts (Cottages)
+            const hutCount = 80;
+            const hutBaseGeo = new THREE.BoxGeometry(5, 4, 6);
+            const hutRootGeo = new THREE.BoxGeometry(6, 4, 7); // Rotated for roof
+            const hutsBase = new THREE.InstancedMesh(hutBaseGeo, new THREE.MeshLambertMaterial({ color: colors.hutBody }), hutCount);
+            const hutsRoof = new THREE.InstancedMesh(hutRootGeo, new THREE.MeshLambertMaterial({ color: colors.hutRoof }), hutCount);
+
+            for (let i = 0; i < hutCount; i++) {
+                const t = (i / hutCount) + (Math.random() * 0.05);
+                if (t >= 1) break;
+                const p = curve.getPointAt(t);
+                const tan = curve.getTangentAt(t);
+                const per = new THREE.Vector3(-tan.z, 0, tan.x);
+                const dist = (15 + Math.random() * 25) * (Math.random() > 0.5 ? 1 : -1);
+
+                dummy.position.set(p.x + per.x * dist, 2, p.z + per.z * dist);
+                dummy.lookAt(p);
+                dummy.updateMatrix();
+                hutsBase.setMatrixAt(i, dummy.matrix);
+
+                dummy.position.y = 5;
+                dummy.rotation.x = Math.PI / 4; // Roof slant
+                dummy.updateMatrix();
+                hutsRoof.setMatrixAt(i, dummy.matrix);
+
+                dummy.rotation.x = 0; // reset
+            }
+            scene.add(hutsBase, hutsRoof);
+
+            // 4. Flowers
+            const flowerGeo = new THREE.SphereGeometry(0.4, 6, 6);
+            colors.flowers.forEach(c => {
+                const mesh = new THREE.InstancedMesh(flowerGeo, new THREE.MeshLambertMaterial({ color: c }), 1500);
+                for (let i = 0; i < 1500; i++) {
+                    const t = Math.random();
+                    const p = curve.getPointAt(t);
+                    const tan = curve.getTangentAt(t);
+                    const per = new THREE.Vector3(-tan.z, 0, tan.x);
+                    const dist = (5 + Math.random() * 15) * (Math.random() > 0.5 ? 1 : -1);
+                    dummy.position.set(p.x + per.x * dist + (Math.random() - 0.5) * 10, 0.4, p.z + per.z * dist + (Math.random() - 0.5) * 10);
+                    dummy.updateMatrix();
+                    mesh.setMatrixAt(i, dummy.matrix);
+                }
+                scene.add(mesh);
+            });
+        }
+
         function createSmoke() {
             if (!train) return;
-            const s = new THREE.Mesh(new THREE.SphereGeometry(0.4, 8, 8), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.7 }));
+            const s = new THREE.Mesh(new THREE.SphereGeometry(0.45, 8, 8), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.7 }));
             const p = new THREE.Vector3(0, 3.5, 2.3);
             p.applyQuaternion(train.quaternion);
             s.position.copy(train.position).add(p);
@@ -311,25 +338,25 @@
                     train.lookAt(curve.getPointAt(0.01));
                     train.rotateY(Math.PI);
                     train.position.y = 0.4 + Math.sin(Date.now() * 0.06) * 0.08;
-                    if (Math.random() > 0.2) createSmoke(); // Lots of smoke at start
-
+                    if (Math.random() > 0.2) createSmoke();
                     if (startTimer > 3) {
                         state = 'running';
                         document.getElementById('status').innerText = "🛤️ Atmospheric Journey Active...";
                     }
                 } else {
-                    progress += 0.0002; // SLOWER SPEED (0.00065 -> 0.0002)
+                    progress += 0.0002; // Slower speed as requested
                     if (progress > 1) progress = 0;
                     const p = curve.getPointAt(progress);
                     const ahead = curve.getPointAt(Math.min(progress + 0.005, 1));
                     train.position.copy(p);
                     train.lookAt(ahead);
                     train.rotateY(Math.PI);
-                    if (Math.random() > 0.45) createSmoke(); // MORE FREQUENT SMOKE
+                    if (Math.random() > 0.45) createSmoke();
                 }
 
+                // Smoke Logic
                 smokeParticles.forEach((s, i) => {
-                    s.userData.life -= 0.008; // Slower fade
+                    s.userData.life -= 0.008;
                     s.position.y += 0.12;
                     s.userData.s += 0.05;
                     s.scale.setScalar(s.userData.s);
@@ -338,9 +365,12 @@
                 });
 
                 if (followCam) {
-                    const off = new THREE.Vector3(25, 18, -40).applyQuaternion(train.quaternion);
-                    camera.position.lerp(new THREE.Vector3().copy(train.position).add(off), 0.08);
-                    camera.lookAt(train.position.x, train.position.y + 4, train.position.z);
+                    // STABILIZED CAMERA: Tight follow to avoid "zooming" feel during turns
+                    const off = new THREE.Vector3(25, 20, -40).applyQuaternion(train.quaternion);
+                    // Using a slightly higher lerp factor for immediate responsive tracking
+                    camera.position.lerp(new THREE.Vector3().copy(train.position).add(off), 0.15);
+                    camera.lookAt(train.position.x, train.position.y + 3, train.position.z);
+                    // Fixed aspect to prevent stretching
                 }
             }
             renderer.render(scene, camera);
