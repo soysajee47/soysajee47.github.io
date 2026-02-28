@@ -69,7 +69,7 @@
         .main-stats {
             display: flex;
             flex-direction: column;
-            gap: 25px;
+            gap: 20px;
         }
 
         .stat-group {
@@ -165,14 +165,16 @@
             text-shadow: 0 0 5px var(--neon-blue);
         }
 
-        .pollution-level {
-            margin-top: 30px;
-            font-size: 1rem;
-            text-align: center;
-            border-radius: 12px;
-            padding: 10px;
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px dashed rgba(255, 255, 255, 0.1);
+        .ver-chip {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            background: #e67e22;
+            font-size: 0.6rem;
+            color: white;
+            font-weight: 900;
         }
     </style>
 </head>
@@ -188,10 +190,11 @@
 
     <div class="dashboard-ui">
         <div class="main-stats">
-            <div style="flex-grow: 1;"></div> <!-- Spacer -->
+            <div style="flex-grow: 1;"></div>
 
             <div class="stat-group">
                 <div class="card">
+                    <div class="ver-chip">V1.1 (PATCHED)</div>
                     <div class="label">Particulate Matter 2.5</div>
                     <div class="value" id="pm25">--<span class="unit">µg/m³</span></div>
                 </div>
@@ -221,8 +224,8 @@
         <div class="card status-terminal">
             <div class="label">Network Feed <span class="badge">LIVE MQTT</span></div>
             <div class="status-log" id="log-container">
-                <div class="log-entry">Booting DustBoy Oracle System...</div>
-                <div class="log-entry">Connecting to MQTT Bridge...</div>
+                <div class="log-entry">Booting DustBoy Oracle V1.1...</div>
+                <div class="log-entry">Scanning multi-version protocols...</div>
             </div>
         </div>
     </div>
@@ -255,7 +258,6 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
             document.getElementById('canvas-container').appendChild(renderer.domElement);
 
-            // Floating Core
             const geo = new THREE.IcosahedronGeometry(4, 2);
             const mat = new THREE.MeshPhongMaterial({
                 color: 0x00d2ff,
@@ -266,13 +268,11 @@
             globe = new THREE.Mesh(geo, mat);
             scene.add(globe);
 
-            // Inner Core
             const innerGeo = new THREE.IcosahedronGeometry(2, 1);
             const innerMat = new THREE.MeshBasicMaterial({ color: 0x00d2ff, wireframe: true });
             const innerGlobe = new THREE.Mesh(innerGeo, innerMat);
             globe.add(innerGlobe);
 
-            // Particles
             const pCount = 2000;
             const pGeo = new THREE.BufferGeometry();
             const pPos = new Float32Array(pCount * 3);
@@ -296,13 +296,11 @@
             globe.rotation.x += 0.002;
             particles.rotation.y -= 0.001;
 
-            // Pulse based on PM25 if available
             const pm25Value = parseFloat(document.getElementById('pm25').innerText);
             if (!isNaN(pm25Value)) {
                 const scale = 1 + (pm25Value / 100) * 0.5 + Math.sin(Date.now() * 0.002) * 0.05;
                 globe.scale.set(scale, scale, scale);
 
-                // Color shift
                 let targetColor = colorScale.safe;
                 if (pm25Value > 50) targetColor = colorScale.warn;
                 if (pm25Value > 100) targetColor = colorScale.danger;
@@ -328,28 +326,40 @@
             client.on('connect', () => {
                 addLog('<b>SYSTEM ONLINE</b>: Connected to Laris MQTT Bridge.');
                 client.subscribe('DUSTBOY/+/+/+/status');
-                addLog('<b>SUBSCRIPTION</b>: DUSTBOY/+/+/+/status');
             });
 
             client.on('message', (topic, message) => {
                 try {
                     const data = JSON.parse(message.toString());
-                    updateUI(data);
-                    addLog(`<b>PACKET</b>: From ${data.nickname || data.id} - PM2.5: ${data.pm25}`);
+                    const extracted = extractData(data);
+                    updateUI(extracted);
+                    addLog(`<b>PACKET</b>: Source ${extracted.name} | PM2.5: ${extracted.pm25}`);
                 } catch (e) {
-                    addLog('<b>ERROR</b>: Failed to parse packet.');
+                    addLog('<b>ERROR</b>: Failed to decode packet.');
                 }
             });
         }
 
+        function extractData(data) {
+            // Support multiple DustBoy formats (V2, V3, V4, V5)
+            const d = data.d || {};
+            return {
+                name: data.nickname || data.id || "Unknown Sensor",
+                pm25: data.pm25 ?? data.log_pm25 ?? d.pm2_5 ?? d.pm25 ?? "--",
+                pm10: data.pm10 ?? data.log_pm10 ?? d.pm10 ?? "--",
+                temp: data.temp ?? data.log_temp ?? d.temp ?? d.temperature ?? "--",
+                hum: data.hum ?? data.log_hum ?? d.humid ?? d.humidity ?? "--"
+            };
+        }
+
         function updateUI(data) {
-            if (data.pm25 !== undefined) {
+            if (data.pm25 !== "--") {
                 document.getElementById('pm25').innerHTML = `${data.pm25}<span class="unit">µg/m³</span>`;
-                updateQuality(data.pm25);
+                updateQuality(parseFloat(data.pm25));
             }
-            if (data.pm10 !== undefined) document.getElementById('pm10').innerHTML = `${data.pm10}<span class="unit">µg/m³</span>`;
-            if (data.temp !== undefined) document.getElementById('temp').innerHTML = `${data.temp}<span class="unit">°C</span>`;
-            if (data.hum !== undefined) document.getElementById('hum').innerHTML = `${data.hum}<span class="unit">%</span>`;
+            if (data.pm10 !== "--") document.getElementById('pm10').innerHTML = `${data.pm10}<span class="unit">µg/m³</span>`;
+            if (data.temp !== "--") document.getElementById('temp').innerHTML = `${data.temp}<span class="unit">°C</span>`;
+            if (data.hum !== "--") document.getElementById('hum').innerHTML = `${data.hum}<span class="unit">%</span>`;
         }
 
         function updateQuality(pm25) {
@@ -375,7 +385,6 @@
             }
         }
 
-        // --- Utilities ---
         setInterval(() => {
             document.getElementById('clock').innerText = new Date().toLocaleTimeString();
         }, 1000);
