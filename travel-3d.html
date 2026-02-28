@@ -106,9 +106,9 @@
 <body>
 
     <div class="ui-overlay">
-        <div class="ver-tag">ULTRA-MINI TREES V6.2</div>
+        <div class="ver-tag">V6.3 - GENTLE FOREST</div>
         <h1>🚂 Colorful Northern Express</h1>
-        <p id="status">Radical Tree Reset. Mini scale enabled.</p>
+        <p id="status">Refined Forest Density & Gentle Smoke emission.</p>
     </div>
 
     <div class="controls">
@@ -256,18 +256,18 @@
                 // Trees: Tall Cones (V5.1 Style)
                 const forestGeo = new THREE.ConeGeometry(2.5, 12, 8);
                 const forestMat = new THREE.MeshLambertMaterial({ color: 0x064e3b });
-                const trees = new THREE.InstancedMesh(forestGeo, forestMat, 5000);
+                const trees = new THREE.InstancedMesh(forestGeo, forestMat, 2000);
 
                 // Flowers: Massive spheres field
                 const flowerGeo = new THREE.SphereGeometry(0.4, 6, 6);
                 const flowerMeshes = colors.flowers.map(c => new THREE.InstancedMesh(flowerGeo, new THREE.MeshLambertMaterial({ color: c }), 2000));
 
-                for (let i = 0; i < 5000; i++) {
+                for (let i = 0; i < 2000; i++) {
                     const t = Math.random();
                     const p = curve.getPointAt(t);
                     const tan = curve.getTangentAt(t);
                     const per = new THREE.Vector3(-tan.z, 0, tan.x);
-                    const dist = (15 + Math.random() * 100) * (Math.random() > 0.5 ? 1 : -1);
+                    const dist = (25 + Math.random() * 100) * (Math.random() > 0.5 ? 1 : -1);
                     dummy.position.set(p.x + per.x * dist, 7, p.z + per.z * dist);
                     dummy.scale.setScalar(0.25 + Math.random() * 0.45);
                     dummy.rotation.y = Math.random() * Math.PI;
@@ -315,7 +315,7 @@
                     train.position.copy(curve.getPointAt(0));
                     train.lookAt(curve.getPointAt(0.01));
                     train.position.y = 0.4 + Math.sin(Date.now() * 0.06) * 0.08;
-                    if (Math.random() > 0.2) createSmoke();
+                    if (Math.random() > 0.85) createSmoke();
 
                     if (startTimer > 3) {
                         state = 'running';
@@ -328,7 +328,7 @@
                     const ahead = curve.getPointAt(Math.min(progress + 0.005, 1));
                     train.position.copy(p);
                     train.lookAt(ahead);
-                    if (Math.random() > 0.45) createSmoke();
+                    if (Math.random() > 0.95) createSmoke();
                 }
 
                 smokeParticles.forEach((s, i) => {
