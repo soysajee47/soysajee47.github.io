@@ -112,7 +112,7 @@
 
     <header class="header">
         <h1>📍 Northern Journey: CM → PLK</h1>
-        <div class="stats" id="point-count">Processing...</div>
+        <div class="stats" id="status">Loading waypoints...</div>
     </header>
 
     <div id="map"></div>
@@ -124,105 +124,101 @@
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // Data processing
-        const rawCSV = `device,model,battery,charging,lat,lon,accuracy,source,place,place_type,locality,address,updated
-Nat iPhone12mini,iPhone 12 mini,80,NotCharging,18.464717,99.05675,5,GPS,,,Mueang Lamphun District,"Mueang Lamphun District, Lamphun 51000",2026-02-27 08:04:17
-Nat iPhone12mini,iPhone 12 mini,80,NotCharging,18.456181,99.057669,14,GPS,,,Mueang Lamphun District,"Mueang Lamphun District, Lamphun 51000",2026-02-27 08:09:47
-Nat iPhone12mini,iPhone 12 mini,78,NotCharging,18.456107,99.087873,15,GPS,,,Mae Tha District,"Mae Tha District, Lamphun 51140",2026-02-27 08:14:32
-Nat iPhone12mini,iPhone 12 mini,77,NotCharging,18.461019,99.137354,14,GPS,,,Mae Tha District,"Mae Tha District, Lamphun 51140",2026-02-27 08:18:36
-Nat iPhone12mini,iPhone 12 mini,69,NotCharging,18.392756,99.265662,51,GPS,,,Hang Chat District,"Hang Chat District, Lampang 52190",2026-02-27 09:01:45
-Nat iPhone12mini,iPhone 12 mini,67,NotCharging,18.364852,99.287066,23,GPS,,,Hang Chat District,"Hang Chat District, Lampang 52190",2026-02-27 09:07:09
-Nat iPhone12mini,iPhone 12 mini,64,NotCharging,18.312283,99.413179,6,GPS,,,Mueang Lampang District,"Mueang Lampang District, Lampang 52100",2026-02-27 09:22:15
-Nat iPhone12mini,iPhone 12 mini,63,NotCharging,18.281088,99.469882,8,GPS,,,Mueang Lampang District,"107 Rotfai Road, Sop Tui, Mueang Lampang District, Lampang 52100",2026-02-27 09:27:25
-Nat iPhone12mini,iPhone 12 mini,61,NotCharging,18.223882,99.515192,10,GPS,,,Mueang Lampang District,"Mueang Lampang District, Lampang 52000",2026-02-27 09:37:48
-Nat iPhone12mini,iPhone 12 mini,57,NotCharging,18.256232,99.655373,14,GPS,,,Mae Mo District,"84 Moo 5, Mae Mo, Mae Mo District, Lampang 52220",2026-02-27 09:53:39
-Nat iPhone12mini,iPhone 12 mini,55,NotCharging,18.264667,99.709782,5,GPS,,,Mae Mo District,"62 Soi Pracha Rat, Mae Mo, Mae Mo District, Lampang 52220",2026-02-27 09:58:27
-Nat iPhone12mini,iPhone 12 mini,52,NotCharging,18.297822,99.86354,9,GPS,,,Mae Mo District,"Mae Mo District, Lampang 52220",2026-02-27 10:14:25
-Nat iPhone12mini,iPhone 12 mini,49,NotCharging,18.211666,99.871989,5,GPS,,,Long District,"76 Rural Highway 4003, Ban Pin, Long District, Phrae 54150",2026-02-27 10:29:32
-Nat iPhone12mini,iPhone 12 mini,48,NotCharging,18.194947,99.870168,26,GPS,,,Long District,"Long District, Phrae 54150",2026-02-27 10:32:30
-Nat iPhone12mini,iPhone 12 mini,46,NotCharging,18.096358,99.866883,2,GPS,,,Long District,"203 Thetsaban 2 Road, Ban Pin, Long District, Phrae 54150",2026-02-27 10:49:41
-Nat iPhone12mini,iPhone 12 mini,44,NotCharging,18.080372,99.879712,16,GPS,,,Long District,"Long District, Phrae 54150",2026-02-27 10:59:32
-Nat iPhone12mini,iPhone 12 mini,42,NotCharging,18.040347,99.916938,60,GPS,,,Long District,"Long District, Phrae 54150",2026-02-27 11:09:52
-Nat iPhone12mini,iPhone 12 mini,38,NotCharging,17.97274,100.052057,14,GPS,,,Den Chai District,"Den Chai District, Phrae 54110",2026-02-27 11:31:00
-Nat iPhone12mini,iPhone 12 mini,35,NotCharging,17.881632,100.040743,6,GPS,,,Den Chai District,"Den Chai District, Phrae 54110",2026-02-27 11:41:39
-Nat iPhone12mini,iPhone 12 mini,32,NotCharging,17.77201,100.108,5,GPS,,,Mueang Uttaradit District,"169 Ro Pho Cho. Uttaradit 4013 Road, Ban Dan Na Kham, Mueang Uttaradit District, Uttaradit 53000",2026-02-27 11:57:12
-Nat iPhone12mini,iPhone 12 mini,30,NotCharging,17.652857,100.122463,5,GPS,,,Mueang Uttaradit District,"Pracha Ruam Chai Road, Tha Sao, Mueang Uttaradit District, Uttaradit 53000",2026-02-27 12:07:28
-Nat iPhone12mini,iPhone 12 mini,28,NotCharging,17.620929,100.097137,14,GPS,,,Mueang Uttaradit District,"1/47 Boromma At Road, Tha It, Mueang Uttaradit District, Uttaradit 53000",2026-02-27 12:17:39
-Nat iPhone12mini,iPhone 12 mini,27,NotCharging,17.594402,100.093817,6,GPS,,,Mueang Uttaradit District,"242 Ban Nong Khan Road, Ban Ko, Mueang Uttaradit District, Uttaradit 53000",2026-02-27 12:23:17
-Nat iPhone12mini,iPhone 12 mini,1,Charging,16.817458,100.25806,60,GPS,,,Mueang Phitsanulok District,"Phibun Songkhram Rajabhat University, Nai Mueang, Mueang Phitsanulok District, Phitsanulok 65000",2026-02-27 16:23:02
-Nat iPhone12mini,iPhone 12 mini,20,Charging,16.816907,100.258004,10,unknown,,,Mueang Phitsanulok District,"Pibulsongkram Rajabhat University, Nai Mueang, Mueang Phitsanulok District, Phitsanulok 65000",2026-02-27 16:59:11
-Nat iPhone12mini,iPhone 12 mini,40,Charging,16.816956,100.258004,10,unknown,,,Mueang Phitsanulok District,"Pibulsongkram Rajabhat University, 66 Wang Chan Road, Nai Mueang, Mueang Phitsanulok District, Phitsanulok 65000",2026-02-27 17:30:17
-Nat iPhone12mini,iPhone 12 mini,45,NotCharging,16.81693,100.258031,15,GPS,,,Mueang Phitsanulok District,"Pibulsongkram Rajabhat University, Nai Mueang, Mueang Phitsanulok District, Phitsanulok 65000",2026-02-27 17:50:55
-Nat iPhone12mini,iPhone 12 mini,1,NotCharging,16.813947,100.263612,8,GPS,,,Mueang Phitsanulok District,"30 Chaophraya Road, Nai Mueang, Mueang Phitsanulok District, Phitsanulok 65000",2026-02-27 18:27:44
-Nat iPhone12mini,iPhone 12 mini,1,NotCharging,16.812322,100.261597,4,Wifi,,,Mueang Phitsanulok District,"169/4 Moo 2, Nai Mueang, Mueang Phitsanulok District, Phitsanulok 65000",2026-02-27 19:34:15
-Nat iPhone12mini,iPhone 12 mini,100,NotCharging,16.817705,100.2582,3,Wifi,,,Mueang Phitsanulok District,"Pibulsongkram Rajabhat University, 66 Wang Chan Road, Nai Mueang, Mueang Phitsanulok District, Phitsanulok 65000",2026-02-28 00:30:30
-Nat iPhone12mini,iPhone 12 mini,100,NotCharging,16.83486,100.213662,9,GPS,,,Mueang Phitsanulok District,"Pibulsongkram Rajabhat University, Thale Thip Road, Phlai Chumphon, Mueang Phitsanulok District, Phitsanulok 65000",2026-02-28 09:01:13
-Nat iPhone12mini,iPhone 12 mini,80,NotCharging,16.834723,100.213696,8,GPS,,,Mueang Phitsanulok District,"Pibulsongkram Rajabhat University, Thale Thip Road, Phlai Chumphon, Mueang Phitsanulok District, Phitsanulok 65000",2026-02-28 12:11:38`;
+        async function initMap() {
+            // Setup Map
+            const map = L.map('map', { zoomControl: false }).setView([18.0, 100.0], 8);
+            L.control.zoom({ position: 'topright' }).addTo(map);
+
+            // Dark Tiles
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                attribution: '© OpenStreetMap, © CARTO'
+            }).addTo(map);
+
+            try {
+                // Fetch dynamic data
+                const response = await fetch('travel-phitsanulok.csv');
+                const csvText = await response.text();
+                const data = parseCSV(csvText);
+
+                const points = data.map(d => [parseFloat(d.lat), parseFloat(d.lon)]).filter(p => !isNaN(p[0]) && !isNaN(p[1]));
+
+                if (points.length === 0) throw new Error("No coordinates found");
+
+                // Path
+                const polyline = L.polyline(points, {
+                    color: '#58a6ff',
+                    weight: 3,
+                    opacity: 0.6,
+                    dashArray: '5, 10'
+                }).addTo(map);
+
+                // Markers (Full Set)
+                data.forEach((row, i) => {
+                    const latlng = [parseFloat(row.lat), parseFloat(row.lon)];
+                    if (isNaN(latlng[0])) return;
+
+                    const isStart = i === 0;
+                    const isEnd = i === data.length - 1;
+
+                    // Only show markers for main waypoints or every 5th point to keep UI clean, but always start/end
+                    if (isStart || isEnd || i % 10 === 0) {
+                        const marker = L.circleMarker(latlng, {
+                            radius: isStart || isEnd ? 8 : 4,
+                            fillColor: isStart ? '#238636' : (isEnd ? '#da3633' : '#58a6ff'),
+                            color: '#fff',
+                            weight: 1,
+                            opacity: 1,
+                            fillOpacity: 0.8
+                        }).addTo(map);
+
+                        marker.bindPopup(`
+                            <div class="popup-card">
+                                <b>📍 ${row.address || row.locality || 'Northern Thailand'}</b><br>
+                                <hr>
+                                🕒 <b>Updated:</b> ${row.updated}<br>
+                                🔋 <b>Battery:</b> ${row.battery}% (${row.charging})<br>
+                                📱 <b>Device:</b> ${row.model}
+                            </div>
+                        `);
+                    }
+                });
+
+                map.fitBounds(polyline.getBounds(), { padding: [50, 50] });
+                document.getElementById('status').innerText = `${data.length} data points loaded`;
+
+            } catch (err) {
+                console.error(err);
+                document.getElementById('status').innerText = "Error loading data.";
+            }
+        }
 
         function parseCSV(csv) {
             const lines = csv.trim().split('\n');
             const headers = lines[0].split(',');
             return lines.slice(1).map(line => {
-                const values = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+                // Better CSV parsing to handle quoted fields with commas
+                const values = [];
+                let current = '';
+                let inQuotes = false;
+                for (let i = 0; i < line.length; i++) {
+                    const char = line[i];
+                    if (char === '"') inQuotes = !inQuotes;
+                    else if (char === ',' && !inQuotes) {
+                        values.push(current.trim());
+                        current = '';
+                    } else current += char;
+                }
+                values.push(current.trim());
+
                 const obj = {};
                 headers.forEach((h, i) => {
-                    const val = values[i] ? values[i].replace(/"/g, '').trim() : '';
-                    obj[h.trim()] = val;
+                    obj[h.trim()] = values[i] ? values[i].replace(/"/g, '') : '';
                 });
                 return obj;
             });
         }
 
-        const data = parseCSV(rawCSV);
-        const points = data.map(d => [parseFloat(d.lat), parseFloat(d.lon)]).filter(p => !isNaN(p[0]));
-
-        // Init Map
-        const map = L.map('map', { zoomControl: false }).setView(points[0], 10);
-        L.control.zoom({ position: 'topright' }).addTo(map);
-
-        // Dark Tiles
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-            attribution: '© OpenStreetMap, © CARTO'
-        }).addTo(map);
-
-        // Path
-        const polyline = L.polyline(points, {
-            color: '#58a6ff',
-            weight: 3,
-            opacity: 0.6,
-            dashArray: '5, 10'
-        }).addTo(map);
-
-        // Markers
-        data.forEach((row, i) => {
-            const latlng = [parseFloat(row.lat), parseFloat(row.lon)];
-            if (isNaN(latlng[0])) return;
-
-            const isStart = i === 0;
-            const isEnd = i === data.length - 1;
-
-            const marker = L.circleMarker(latlng, {
-                radius: isStart || isEnd ? 7 : 4,
-                fillColor: isStart ? '#238636' : (isEnd ? '#da3633' : '#58a6ff'),
-                color: '#fff',
-                weight: 1,
-                opacity: 1,
-                fillOpacity: 0.8
-            }).addTo(map);
-
-            marker.bindPopup(`
-                <div class="popup-card">
-                    <b>📍 ${row.address || row.locality || 'Unknown'}</b><br>
-                    <hr>
-                    🕒 <b>Updated:</b> ${row.updated}<br>
-                    🔋 <b>Battery:</b> ${row.battery}% (${row.charging})<br>
-                    📱 <b>Device:</b> ${row.model}
-                </div>
-            `);
-        });
-
-        map.fitBounds(polyline.getBounds(), { padding: [50, 50] });
-        document.getElementById('point-count').innerText = `${data.length} main waypoints rendered`;
+        initMap();
     </script>
 </body>
 
