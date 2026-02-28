@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Northern Journey | Soysajee Oracle</title>
+    <style>
+        body {
+            margin: 0;
+            background: #000;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+        }
+
+        #canvas-container {
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .ui-overlay {
+            position: absolute;
+            top: 25px;
+            left: 25px;
+            z-index: 10;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px 30px;
+            border-radius: 24px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            max-width: 320px;
+        }
+
+        .ui-overlay h1 {
+            margin: 0;
+            font-size: 1.3rem;
+            color: #1e293b;
+            font-weight: 900;
+        }
+
+        .ui-overlay p {
+            margin: 8px 0 0;
+            font-size: 0.9rem;
+            color: #64748b;
+            line-height: 1.5;
+        }
+
+        .ver-tag {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: #e74c3c;
+            color: white;
+            font-size: 0.7rem;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(231, 76, 60, 0.4);
+        }
+
+        .controls {
+            position: absolute;
+            bottom: 40px;
+            right: 40px;
+            display: flex;
+            gap: 15px;
+            z-index: 10;
+        }
+
+        button {
+            padding: 15px 30px;
+            border-radius: 16px;
+            border: none;
+            background: #ff4757;
+            color: white;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(255, 71, 87, 0.4);
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-transform: uppercase;
+        }
+
+        button:hover {
+            transform: translateY(-5px);
+            background: #ff6b81;
+        }
+
+        .footer {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.8rem;
+            color: #475569;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 6px 20px;
+            border-radius: 30px;
+            font-weight: 700;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="ui-overlay">
+        <div class="ver-tag">DEFINITIVE V6.0</div>
+        <h1>🚂 Journey to Phitsanulok</h1>
+        <p id="status">Starting steam engine... Warmup in progress (3s).</p>
+    </div>
+
+    <div class="controls">
+        <button onclick="toggleFollow()">🎥 Fix/Free Camera</button>
+    </div>
+
+    <div class="footer">
+        🌊 Rebuilt by <b>Soysajee Oracle</b> (The Gentle Stream)
+    </div>
+
+    <div id="canvas-container"></div>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.161.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.161.0/examples/jsm/"
+            }
+        }
+    </script>
+    <script type="module">
+        import * as THREE from 'three';
+
+        // --- Configuration ---
+        const colors = {
+            sky: 0x87ceeb,
+            ground: 0x14532d,
+            trainBody: 0xff4757,
+            trainCabin: 0x1e90ff,
+            trainAcc: 0xffd32a,
+            smoke: 0xffffff,
+            hutBody: 0xd2b48c,
+            hutRoof: 0x8b4513,
+            flowers: [0xff9ff3, 0xfeca57, 0xff6b6b, 0x48dbfb, 0x1dd1a1, 0xffffff]
+        };
+
+        let scene, camera, renderer, train, curve;
+        let progress = 0, state = 'starting', startTimer = 0;
+        let smokeParticles = [], followCam = true;
+
+        function init() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(colors.sky);
+            scene.fog = new THREE.Fog(colors.sky, 200, 700);
+
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 5000);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true;
+            document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+            scene.add(new THREE.AmbientLight(0xffffff, 0.9));
+            const sun = new THREE.DirectionalLight(0xffffff, 1.5);
+            sun.position.set(150, 200, 100);
+            sun.castShadow = true;
+            scene.add(sun);
+
+            const ground = new THREE.Mesh(
+                new THREE.PlaneGeometry(20000, 20000),
+                new THREE.MeshLambertMaterial({ color: colors.ground })
+            );
+            ground.rotation.x = -Math.PI / 2;
+            ground.receiveShadow = true;
+            scene.add(ground);
+
+            buildTrain();
+            loadJourneyData();
+            animate();
+        }
+
+        function buildTrain() {
+            train = new THREE.Group();
+            const matBody = new THREE.MeshPhongMaterial({ color: colors.trainBody });
+
+            // Engine Base
+            const eng = new THREE.Mesh(new THREE.BoxGeometry(2.5, 1.8, 4), matBody);
+            eng.position.y = 1.2;
+            train.add(eng);
+
+            const boiler = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 0.9, 3.2, 32), matBody);
+            boiler.rotateX(Math.PI / 2);
+            boiler.position.set(0, 1.5, 1.5);
+            train.add(boiler);
+
+            // Bright Blue Cabin
+            const cab = new THREE.Mesh(new THREE.BoxGeometry(2.2, 1.6, 1.6), new THREE.MeshPhongMaterial({ color: colors.trainCabin }));
+            cab.position.set(0, 2.5, -1);
+            train.add(cab);
+
+            // Red Chimney
+            const chim = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.25, 1), new THREE.MeshPhongMaterial({ color: 0x333 }));
+            chim.position.set(0, 2.5, 2.5);
+            train.add(chim);
+
+            // Headlight
+            const lnt = new THREE.Mesh(new THREE.SphereGeometry(0.5, 16, 16), new THREE.MeshBasicMaterial({ color: 0xffffaa }));
+            lnt.position.set(0, 1.5, 3.1);
+            train.add(lnt);
+
+            scene.add(train);
+        }
+
+        async function loadJourneyData() {
+            try {
+                const res = await fetch('travel-phitsanulok.csv');
+                if (!res.ok) throw new Error("CSV check failed");
+                const csv = await res.text();
+                const lines = csv.trim().split('\n');
+                const pts = [];
+
+                for (let i = 1; i < lines.length; i++) {
+                    const r = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+                    const lat = parseFloat(r[4]), lon = parseFloat(r[5]);
+                    if (!isNaN(lat)) {
+                        pts.push(new THREE.Vector3((lon - 99.5) * 800, 0.4, (lat - 17.5) * -800));
+                    }
+                }
+
+                curve = new THREE.CatmullRomCurve3(pts);
+
+                buildEnvironment();
+            } catch (e) {
+                document.getElementById('status').innerText = "Path loading error. Ensure CSV is in repository.";
+            }
+        }
+
+        function buildEnvironment() {
+            const curvePts = curve.getSpacedPoints(1800);
+
+            // Tracks
+            const woodMat = new THREE.MeshStandardMaterial({ color: 0x482307 });
+            const railMat = new THREE.MeshStandardMaterial({ color: 0xc0c0c0, metalness: 0.9, roughness: 0.1 });
+            const sleeperMesh = new THREE.InstancedMesh(new THREE.BoxGeometry(3.6, 0.18, 0.8), woodMat, curvePts.length);
+            const railLMesh = new THREE.InstancedMesh(new THREE.BoxGeometry(0.18, 0.22, 3), railMat, curvePts.length);
+            const railRMesh = new THREE.InstancedMesh(new THREE.BoxGeometry(0.18, 0.22, 3), railMat, curvePts.length);
+
+            const dummy = new THREE.Object3D();
+            for (let i = 0; i < curvePts.length; i++) {
+                dummy.position.copy(curvePts[i]);
+                dummy.lookAt(curvePts[i + 1] || curvePts[i]);
+                dummy.updateMatrix();
+                sleeperMesh.setMatrixAt(i, dummy.matrix);
+                dummy.translateX(-1.0); dummy.position.y = 0.25; dummy.updateMatrix();
+                railLMesh.setMatrixAt(i, dummy.matrix);
+                dummy.translateX(2.0); dummy.updateMatrix();
+                railRMesh.setMatrixAt(i, dummy.matrix);
+                dummy.position.y = 0;
+            }
+            scene.add(sleeperMesh, railLMesh, railRMesh);
+
+            // Forests (Tall Trees)
+            const forestMat = new THREE.MeshLambertMaterial({ color: 0x064e3b });
+            const trees = new THREE.InstancedMesh(new THREE.ConeGeometry(3.5, 18, 8), forestMat, 5000);
+            for (let i = 0; i < 5000; i++) {
+                const t = Math.random();
+                const p = curve.getPointAt(t);
+                const tan = curve.getTangentAt(t);
+                const per = new THREE.Vector3(-tan.z, 0, tan.x);
+                const dist = (22 + Math.random() * 120) * (Math.random() > 0.5 ? 1 : -1);
+                dummy.position.set(p.x + per.x * dist, 9, p.z + per.z * dist);
+                dummy.scale.setScalar(1.8 + Math.random() * 3.5);
+                dummy.rotation.y = Math.random() * Math.PI;
+                dummy.updateMatrix();
+                trees.setMatrixAt(i, dummy.matrix);
+            }
+            scene.add(trees);
+
+            // High Density Huts (250 houses)
+            const hutCount = 250;
+            const hutsBase = new THREE.InstancedMesh(new THREE.BoxGeometry(6, 4.5, 7), new THREE.MeshLambertMaterial({ color: colors.hutBody }), hutCount);
+            const hutsRoof = new THREE.InstancedMesh(new THREE.BoxGeometry(7, 4, 8), new THREE.MeshLambertMaterial({ color: colors.hutRoof }), hutCount);
+
+            for (let i = 0; i < hutCount; i++) {
+                const t = Math.random();
+                const p = curve.getPointAt(t);
+                const tan = curve.getTangentAt(t);
+                const per = new THREE.Vector3(-tan.z, 0, tan.x);
+                const dist = (18 + Math.random() * 40) * (Math.random() > 0.5 ? 1 : -1);
+
+                dummy.position.set(p.x + per.x * dist, 2.2, p.z + per.z * dist);
+                dummy.lookAt(p.x, 2.2, p.z);
+                dummy.updateMatrix();
+                hutsBase.setMatrixAt(i, dummy.matrix);
+
+                dummy.position.y = 5.5;
+                dummy.rotation.x = Math.PI / 4;
+                dummy.updateMatrix();
+                hutsRoof.setMatrixAt(i, dummy.matrix);
+                dummy.rotation.x = 0;
+            }
+            scene.add(hutsBase, hutsRoof);
+
+            // Flowers
+            colors.flowers.forEach(c => {
+                const mesh = new THREE.InstancedMesh(new THREE.SphereGeometry(0.5, 6, 6), new THREE.MeshLambertMaterial({ color: c }), 2000);
+                for (let i = 0; i < 2000; i++) {
+                    const t = Math.random();
+                    const p = curve.getPointAt(t);
+                    const tan = curve.getTangentAt(t);
+                    const per = new THREE.Vector3(-tan.z, 0, tan.x);
+                    const dist = (6 + Math.random() * 25) * (Math.random() > 0.5 ? 1 : -1);
+                    dummy.position.set(p.x + per.x * dist + (Math.random() - 0.5) * 15, 0.4, p.z + per.z * dist + (Math.random() - 0.5) * 15);
+                    dummy.updateMatrix();
+                    mesh.setMatrixAt(i, dummy.matrix);
+                }
+                scene.add(mesh);
+            });
+
+            document.getElementById('status').innerText = "🚂 Ready! Steam engine active (V6.0).";
+        }
+
+        function createSmoke() {
+            if (!train) return;
+            const s = new THREE.Mesh(new THREE.SphereGeometry(0.5, 8, 8), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.8 }));
+            const p = new THREE.Vector3(0, 3.8, 2.5);
+            p.applyQuaternion(train.quaternion);
+            s.position.copy(train.position).add(p);
+            s.userData = { life: 1, s: 0.6 };
+            scene.add(s);
+            smokeParticles.push(s);
+        }
+
+        window.toggleFollow = () => { followCam = !followCam; };
+
+        function animate() {
+            requestAnimationFrame(animate);
+            if (curve) {
+                if (state === 'starting') {
+                    startTimer += 0.01;
+                    train.position.copy(curve.getPointAt(0));
+                    train.lookAt(curve.getPointAt(0.01));
+                    train.position.y = 0.4 + Math.sin(Date.now() * 0.06) * 0.1;
+                    if (Math.random() > 0.1) createSmoke();
+                    if (startTimer > 3) {
+                        state = 'running';
+                        document.getElementById('status').innerText = "🛤️ Slower Relaxing Journey...";
+                    }
+                } else {
+                    progress += 0.0001; // EXTREMELY SLOWER SPEED
+                    if (progress > 1) progress = 0;
+                    const p = curve.getPointAt(progress);
+                    const ahead = curve.getPointAt(Math.min(progress + 0.005, 1));
+                    train.position.copy(p);
+                    train.lookAt(ahead);
+                    if (Math.random() > 0.4) createSmoke();
+                }
+
+                smokeParticles.forEach((s, i) => {
+                    s.userData.life -= 0.007;
+                    s.position.y += 0.15;
+                    s.userData.s += 0.06;
+                    s.scale.setScalar(s.userData.s);
+                    s.material.opacity = s.userData.life;
+                    if (s.userData.life <= 0) { scene.remove(s); smokeParticles.splice(i, 1); }
+                });
+
+                if (followCam) {
+                    // HARD LOCKED CAMERA (Zero zooming during turns)
+                    const offset = new THREE.Vector3(30, 25, -50).applyQuaternion(train.quaternion);
+                    camera.position.copy(train.position).add(offset); // No lerp = No zooming/lag
+                    camera.lookAt(train.position.x, train.position.y + 4, train.position.z);
+                }
+            }
+            renderer.render(scene, camera);
+        }
+        init();
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+
+</html>
