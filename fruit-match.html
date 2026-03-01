@@ -6,6 +6,47 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>จับคู่แสนสนุก 🍓</title>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, push, onValue, query, orderByChild, limitToFirst } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        // ══════════════════════════════════════════════════════
+        // 🔥 FIREBASE CONFIG — แก้ค่าด้านล่างนี้ด้วยค่าจาก Firebase Project ของคุณ
+        // สร้างฟรีที่: https://console.firebase.google.com
+        // ══════════════════════════════════════════════════════
+        const FIREBASE_CONFIG = {
+            apiKey: "REPLACE_API_KEY",
+            authDomain: "REPLACE_AUTH_DOMAIN",
+            databaseURL: "REPLACE_DATABASE_URL",
+            projectId: "REPLACE_PROJECT_ID",
+            storageBucket: "REPLACE_STORAGE_BUCKET",
+            messagingSenderId: "REPLACE_MESSAGING_SENDER_ID",
+            appId: "REPLACE_APP_ID"
+        };
+
+        const isConfigured = !FIREBASE_CONFIG.apiKey.startsWith("REPLACE");
+        let db = null;
+
+        if (isConfigured) {
+            try {
+                const app = initializeApp(FIREBASE_CONFIG);
+                db = getDatabase(app);
+                window.__fbDB = db;
+                window.__fbRef = ref;
+                window.__fbPush = push;
+                window.__fbOnValue = onValue;
+                window.__fbQuery = query;
+                window.__fbOrderByChild = orderByChild;
+                console.log("✅ Firebase connected");
+            } catch (e) {
+                console.warn("Firebase init failed:", e);
+            }
+        } else {
+            console.warn("⚠️ Firebase not configured — using localStorage fallback");
+        }
+        window.__fbConfigured = isConfigured;
+    </script>
     <style>
         * {
             margin: 0;
@@ -24,48 +65,42 @@
             padding: 16px 12px;
         }
 
-        /* ═ SCREENS ═ */
         .screen {
             display: none;
             width: 100%;
             max-width: 640px;
             flex-direction: column;
             align-items: center;
-            gap: 18px;
+            gap: 16px;
         }
 
         .screen.active {
             display: flex;
         }
 
-        /* ═ LOGO ═ */
-        .logo-wrap {
-            text-align: center;
-            margin-bottom: 4px;
-        }
-
+        /* LOGO */
         .logo-main {
-            font-size: clamp(2.2rem, 7vw, 3.4rem);
+            font-size: clamp(2rem, 6vw, 3.2rem);
             font-weight: 900;
             background: linear-gradient(135deg, #f093fb 0%, #f5a623 50%, #43e97b 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            line-height: 1.1;
             letter-spacing: -1px;
-        }
-
-        .logo-sub {
-            color: rgba(255, 255, 255, .35);
-            font-size: .85rem;
-            margin-top: 2px;
-            letter-spacing: 1px;
+            line-height: 1.1;
         }
 
         .logo-emoji {
-            font-size: 3rem;
+            font-size: 2.8rem;
             display: block;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
             animation: bounce 2s infinite;
+        }
+
+        .logo-sub {
+            color: rgba(255, 255, 255, .32);
+            font-size: .82rem;
+            letter-spacing: 1px;
+            margin-top: 2px;
         }
 
         @keyframes bounce {
@@ -76,20 +111,20 @@
             }
 
             50% {
-                transform: translateY(-8px)
+                transform: translateY(-7px)
             }
         }
 
-        /* ═ LOGIN SCREEN ═ */
+        /* LOGIN */
         #screen-login {
-            padding-top: 40px;
+            padding-top: 32px;
         }
 
         .login-card {
             background: rgba(255, 255, 255, .07);
-            border: 1px solid rgba(255, 255, 255, .12);
-            border-radius: 24px;
-            padding: 32px 28px;
+            border: 1px solid rgba(255, 255, 255, .13);
+            border-radius: 22px;
+            padding: 28px 26px;
             width: 100%;
             max-width: 380px;
             text-align: center;
@@ -97,8 +132,8 @@
         }
 
         .login-label {
-            color: rgba(255, 255, 255, .6);
-            font-size: .95rem;
+            color: rgba(255, 255, 255, .55);
+            font-size: .92rem;
             margin-bottom: 10px;
             display: block;
         }
@@ -106,9 +141,9 @@
         .name-input {
             width: 100%;
             padding: 14px 18px;
-            background: rgba(255, 255, 255, .08);
+            background: rgba(255, 255, 255, .09);
             border: 2px solid rgba(255, 255, 255, .15);
-            border-radius: 14px;
+            border-radius: 13px;
             color: #fff;
             font-family: 'Kanit', sans-serif;
             font-size: 1.1rem;
@@ -119,7 +154,7 @@
         }
 
         .name-input::placeholder {
-            color: rgba(255, 255, 255, .25);
+            color: rgba(255, 255, 255, .22);
         }
 
         .name-input:focus {
@@ -127,71 +162,116 @@
         }
 
         .btn-start {
-            margin-top: 16px;
+            margin-top: 14px;
             width: 100%;
             padding: 14px;
             background: linear-gradient(135deg, #f093fb, #f5a623);
             border: none;
-            border-radius: 14px;
+            border-radius: 13px;
             color: #fff;
             font-family: 'Kanit', sans-serif;
-            font-size: 1.1rem;
+            font-size: 1.05rem;
             font-weight: 700;
             cursor: pointer;
-            letter-spacing: .5px;
-            box-shadow: 0 8px 24px rgba(240, 147, 251, .35);
+            box-shadow: 0 8px 22px rgba(240, 147, 251, .35);
             transition: all .2s;
         }
 
         .btn-start:hover {
             transform: translateY(-2px);
-            box-shadow: 0 12px 32px rgba(240, 147, 251, .45);
+            box-shadow: 0 12px 30px rgba(240, 147, 251, .45);
         }
 
         .btn-start:disabled {
-            opacity: .4;
+            opacity: .38;
             cursor: not-allowed;
             transform: none;
         }
 
-        /* ═ LEADERBOARD PREVIEW ═ */
+        /* FIREBASE NOTICE */
+        .fb-notice {
+            background: rgba(241, 90, 36, .1);
+            border: 1px solid rgba(241, 90, 36, .3);
+            border-radius: 14px;
+            padding: 12px 16px;
+            color: rgba(255, 180, 100, .85);
+            font-size: .8rem;
+            line-height: 1.6;
+            max-width: 380px;
+            width: 100%;
+        }
+
+        .fb-notice strong {
+            color: #f5a623;
+        }
+
+        .fb-notice a {
+            color: #43e97b;
+            text-decoration: underline;
+        }
+
+        /* LEADERBOARD PREVIEW @ LOGIN */
         .lb-preview {
             width: 100%;
             max-width: 380px;
         }
 
-        .lb-title {
-            color: rgba(255, 255, 255, .5);
-            font-size: .8rem;
+        .lb-section-title {
+            color: rgba(255, 255, 255, .4);
+            font-size: .75rem;
             letter-spacing: 1px;
             text-transform: uppercase;
             margin-bottom: 8px;
             text-align: center;
         }
 
+        /* PODIUM ROW STYLE */
         .lb-row {
-            display: flex;
+            display: grid;
+            grid-template-columns: 40px 1fr 80px;
             align-items: center;
-            gap: 10px;
-            background: rgba(255, 255, 255, .05);
+            padding: 10px 14px;
             border-radius: 12px;
-            padding: 8px 14px;
             margin-bottom: 6px;
-            border: 1px solid rgba(255, 255, 255, .07);
+            gap: 8px;
+        }
+
+        .lb-row.gold {
+            background: linear-gradient(90deg, rgba(245, 166, 35, .18), rgba(245, 166, 35, .05));
+            border: 1px solid rgba(245, 166, 35, .3);
+        }
+
+        .lb-row.silver {
+            background: linear-gradient(90deg, rgba(160, 174, 192, .15), rgba(160, 174, 192, .03));
+            border: 1px solid rgba(160, 174, 192, .2);
+        }
+
+        .lb-row.bronze {
+            background: linear-gradient(90deg, rgba(205, 133, 63, .15), rgba(205, 133, 63, .03));
+            border: 1px solid rgba(205, 133, 63, .2);
+        }
+
+        .lb-row.normal {
+            background: rgba(255, 255, 255, .04);
+            border: 1px solid rgba(255, 255, 255, .06);
         }
 
         .lb-rank {
-            color: #f5a623;
-            font-weight: 800;
-            font-size: .95rem;
-            min-width: 24px;
+            font-size: 1.2rem;
+            text-align: center;
         }
 
         .lb-name {
             color: #fff;
             font-weight: 600;
-            flex: 1;
             font-size: .9rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .lb-meta {
+            text-align: right;
         }
 
         .lb-time {
@@ -200,21 +280,23 @@
             font-size: .9rem;
         }
 
-        .lb-stars-sm {
-            font-size: .7rem;
-            color: #fbd38d;
-        }
-
         .lb-empty {
-            color: rgba(255, 255, 255, .25);
-            font-size: .85rem;
+            color: rgba(255, 255, 255, .2);
             text-align: center;
-            padding: 12px;
+            padding: 20px;
+            font-size: .85rem;
         }
 
-        /* ═ LEVEL SELECT ═ */
+        .lb-loading {
+            color: rgba(255, 255, 255, .3);
+            text-align: center;
+            padding: 14px;
+            font-size: .82rem;
+        }
+
+        /* LEVEL SELECT */
         #screen-select {
-            padding-top: 20px;
+            padding-top: 16px;
         }
 
         .player-bar {
@@ -224,48 +306,48 @@
             width: 100%;
             background: rgba(255, 255, 255, .06);
             border: 1px solid rgba(255, 255, 255, .1);
-            border-radius: 16px;
-            padding: 10px 18px;
+            border-radius: 14px;
+            padding: 9px 16px;
         }
 
         .player-name-tag {
             color: #f5a623;
             font-weight: 700;
-            font-size: 1rem;
         }
 
-        .btn-logout {
+        .btn-sm {
             background: rgba(255, 255, 255, .07);
             border: 1px solid rgba(255, 255, 255, .1);
-            color: rgba(255, 255, 255, .4);
-            padding: 5px 14px;
+            color: rgba(255, 255, 255, .5);
             border-radius: 50px;
+            padding: 7px 16px;
             font-family: 'Kanit', sans-serif;
-            font-size: .8rem;
+            font-size: .82rem;
+            font-weight: 600;
             cursor: pointer;
             transition: all .2s;
         }
 
-        .btn-logout:hover {
-            color: #fff;
+        .btn-sm:hover {
             background: rgba(255, 255, 255, .14);
+            color: #fff;
         }
 
         .levels-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
-            gap: 12px;
+            grid-template-columns: repeat(auto-fit, minmax(148px, 1fr));
+            gap: 11px;
             width: 100%;
         }
 
         .level-card {
             background: rgba(255, 255, 255, .07);
             border: 1px solid rgba(255, 255, 255, .1);
-            border-radius: 18px;
-            padding: 20px 12px;
+            border-radius: 16px;
+            padding: 18px 12px;
             text-align: center;
             cursor: pointer;
-            transition: all .25s;
+            transition: all .22s;
             position: relative;
             overflow: hidden;
         }
@@ -273,11 +355,11 @@
         .level-card:hover:not(.locked) {
             transform: translateY(-4px);
             background: rgba(255, 255, 255, .13);
-            box-shadow: 0 12px 36px rgba(0, 0, 0, .4);
+            box-shadow: 0 10px 32px rgba(0, 0, 0, .4);
         }
 
         .level-card.locked {
-            opacity: .38;
+            opacity: .35;
             cursor: not-allowed;
         }
 
@@ -285,43 +367,43 @@
             border-color: rgba(72, 187, 120, .4);
         }
 
-        .lv-badge {
+        .lv-num {
             position: absolute;
-            top: 9px;
-            right: 11px;
+            top: 8px;
+            right: 10px;
             font-size: .6rem;
             font-weight: 700;
             letter-spacing: 1px;
-            color: rgba(255, 255, 255, .28);
+            color: rgba(255, 255, 255, .25);
             text-transform: uppercase;
         }
 
         .lv-icon {
-            font-size: 2rem;
-            margin-bottom: 5px;
+            font-size: 1.9rem;
+            margin-bottom: 4px;
         }
 
         .lv-name {
-            font-size: .95rem;
+            font-size: .9rem;
             font-weight: 700;
             color: #fff;
             margin-bottom: 2px;
         }
 
         .lv-info {
-            font-size: .72rem;
-            color: rgba(255, 255, 255, .38);
+            font-size: .7rem;
+            color: rgba(255, 255, 255, .36);
         }
 
         .lv-stars {
             font-size: .85rem;
-            margin-top: 7px;
+            margin-top: 6px;
             letter-spacing: 2px;
         }
 
-        /* ═ GAME SCREEN ═ */
+        /* GAME */
         #screen-game {
-            padding-top: 12px;
+            padding-top: 10px;
         }
 
         .game-head {
@@ -333,7 +415,7 @@
             gap: 8px;
         }
 
-        .lv-badge-head {
+        .lv-head {
             display: flex;
             align-items: center;
             gap: 6px;
@@ -343,7 +425,7 @@
             padding: 6px 14px;
             color: #fff;
             font-weight: 700;
-            font-size: .88rem;
+            font-size: .86rem;
         }
 
         .stats {
@@ -354,21 +436,21 @@
         .sbox {
             background: rgba(255, 255, 255, .08);
             border: 1px solid rgba(255, 255, 255, .1);
-            border-radius: 12px;
+            border-radius: 11px;
             padding: 5px 12px;
             text-align: center;
         }
 
-        .sbox .sl {
-            color: rgba(255, 255, 255, .32);
-            font-size: .6rem;
+        .sl {
+            color: rgba(255, 255, 255, .3);
+            font-size: .58rem;
             letter-spacing: .8px;
             text-transform: uppercase;
         }
 
-        .sbox .sv {
+        .sv {
             color: #fff;
-            font-size: 1rem;
+            font-size: .98rem;
             font-weight: 700;
         }
 
@@ -384,7 +466,7 @@
             color: #f093fb;
         }
 
-        /* ═ CARD GRID ═ */
+        /* CARD GRID */
         .grid {
             display: grid;
             gap: 9px;
@@ -393,12 +475,12 @@
 
         .grid.g4 {
             grid-template-columns: repeat(4, 1fr);
-            max-width: 460px;
+            max-width: 450px;
         }
 
         .grid.g5 {
             grid-template-columns: repeat(5, 1fr);
-            max-width: 560px;
+            max-width: 550px;
         }
 
         .card {
@@ -414,7 +496,7 @@
             position: relative;
             transform-style: preserve-3d;
             transition: transform .42s cubic-bezier(.4, 0, .2, 1);
-            border-radius: 13px;
+            border-radius: 12px;
         }
 
         .card.flipped .card-inner,
@@ -426,7 +508,7 @@
         .card-front {
             position: absolute;
             inset: 0;
-            border-radius: 13px;
+            border-radius: 12px;
             backface-visibility: hidden;
             display: flex;
             align-items: center;
@@ -436,22 +518,21 @@
         .card-back {
             background: linear-gradient(135deg, #2d3748, #4a5568);
             border: 2px solid rgba(255, 255, 255, .1);
-            font-size: 1.3rem;
-            color: rgba(255, 255, 255, .22);
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, .2);
             box-shadow: 0 4px 14px rgba(0, 0, 0, .4);
-            transition: background .2s;
         }
 
         .card:hover:not(.flipped):not(.matched) .card-back {
-            background: linear-gradient(135deg, #3a4f6a, #58697f);
+            background: linear-gradient(135deg, #3a4f6a, #587080);
         }
 
         .card-front {
             background: linear-gradient(135deg, #fff, #f0f4ff);
             transform: rotateY(180deg);
             border: 2px solid rgba(255, 255, 255, .8);
-            box-shadow: 0 5px 20px rgba(0, 0, 0, .22);
-            font-size: clamp(1.4rem, 3.5vw, 2.1rem);
+            box-shadow: 0 5px 18px rgba(0, 0, 0, .2);
+            font-size: clamp(1.4rem, 3.5vw, 2rem);
         }
 
         .card.matched .card-front {
@@ -476,7 +557,7 @@
         }
 
         .card.wrong .card-inner {
-            animation: shake .4s ease;
+            animation: shake .38s ease;
         }
 
         @keyframes shake {
@@ -512,25 +593,7 @@
             font-weight: 700;
         }
 
-        .btn-sm {
-            background: rgba(255, 255, 255, .07);
-            border: 1px solid rgba(255, 255, 255, .12);
-            color: rgba(255, 255, 255, .55);
-            border-radius: 50px;
-            padding: 7px 16px;
-            font-family: 'Kanit', sans-serif;
-            font-size: .82rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all .2s;
-        }
-
-        .btn-sm:hover {
-            background: rgba(255, 255, 255, .14);
-            color: #fff;
-        }
-
-        /* ═ WIN OVERLAY ═ */
+        /* WIN OVERLAY */
         #win-ov {
             display: none;
             position: fixed;
@@ -551,12 +614,14 @@
             background: linear-gradient(135deg, #1a1a2e, #16213e);
             border: 1px solid rgba(255, 255, 255, .13);
             border-radius: 26px;
-            padding: 32px 36px;
+            padding: 28px 32px;
             text-align: center;
             max-width: 380px;
             width: 100%;
             box-shadow: 0 28px 72px rgba(0, 0, 0, .6);
             animation: sUp .5s cubic-bezier(.34, 1.56, .64, 1);
+            max-height: 92vh;
+            overflow-y: auto;
         }
 
         @keyframes sUp {
@@ -572,41 +637,41 @@
         }
 
         .we {
-            font-size: 2.8rem;
-            margin-bottom: 5px;
+            font-size: 2.6rem;
+            margin-bottom: 4px;
         }
 
         .wt {
-            font-size: 1.7rem;
+            font-size: 1.6rem;
             font-weight: 800;
             background: linear-gradient(135deg, #f5a623, #f093fb, #43e97b);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 4px;
+            margin-bottom: 3px;
         }
 
         .ws {
-            color: rgba(255, 255, 255, .4);
-            font-size: .88rem;
-            margin-bottom: 16px;
+            color: rgba(255, 255, 255, .38);
+            font-size: .86rem;
+            margin-bottom: 14px;
         }
 
         .stars-row {
             display: flex;
             justify-content: center;
             gap: 8px;
-            margin-bottom: 16px;
+            margin-bottom: 14px;
         }
 
         .star {
-            font-size: 2.4rem;
+            font-size: 2.2rem;
             opacity: 0;
             transform: scale(0) rotate(-30deg);
             animation: sPop .5s cubic-bezier(.34, 1.56, .64, 1) forwards;
         }
 
         .star.grey {
-            filter: grayscale(1) brightness(.5);
+            filter: grayscale(1) brightness(.4);
         }
 
         .star:nth-child(1) {
@@ -630,9 +695,10 @@
 
         .win-meta {
             display: flex;
-            gap: 14px;
+            gap: 12px;
             justify-content: center;
             margin-bottom: 10px;
+            flex-wrap: wrap;
         }
 
         .wm-box {
@@ -640,25 +706,25 @@
         }
 
         .wm-l {
-            color: rgba(255, 255, 255, .3);
-            font-size: .62rem;
+            color: rgba(255, 255, 255, .28);
+            font-size: .6rem;
             letter-spacing: .8px;
             text-transform: uppercase;
         }
 
         .wm-v {
             color: #fff;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: 700;
         }
 
         .score100 {
-            font-size: 2.2rem;
+            font-size: 2rem;
             font-weight: 900;
             background: linear-gradient(135deg, #f5a623, #fa709a);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin: 8px 0 4px;
+            margin: 8px 0 3px;
         }
 
         .btns-row {
@@ -670,11 +736,11 @@
         }
 
         .btn-n {
-            padding: 11px 26px;
+            padding: 11px 24px;
             border: none;
             border-radius: 50px;
             font-family: 'Kanit', sans-serif;
-            font-size: .95rem;
+            font-size: .92rem;
             font-weight: 700;
             cursor: pointer;
             transition: all .2s;
@@ -700,86 +766,99 @@
             transform: translateY(-2px);
         }
 
-        /* ═ LEADERBOARD SCREEN ═ */
+        /* LEADERBOARD FULL SCREEN */
         #screen-lb {
-            padding-top: 20px;
+            padding-top: 16px;
         }
 
-        .lb-full {
+        .lb-full-wrap {
             width: 100%;
-            background: rgba(255, 255, 255, .06);
-            border: 1px solid rgba(255, 255, 255, .1);
-            border-radius: 20px;
+            background: rgba(255, 255, 255, .05);
+            border: 1px solid rgba(255, 255, 255, .08);
+            border-radius: 18px;
             overflow: hidden;
         }
 
-        .lb-head-row {
+        .lb-head {
             display: grid;
-            grid-template-columns: 36px 1fr 90px 70px;
+            grid-template-columns: 48px 1fr 80px;
             gap: 8px;
             padding: 10px 16px;
-            background: rgba(255, 255, 255, .05);
-            color: rgba(255, 255, 255, .35);
-            font-size: .72rem;
+            background: rgba(255, 255, 255, .04);
+            color: rgba(255, 255, 255, .3);
+            font-size: .7rem;
             letter-spacing: .8px;
             text-transform: uppercase;
         }
 
-        .lb-data-row {
+        /* ALSO SHOW LB IN WIN CARD */
+        .win-lb {
+            margin-top: 14px;
+            border-top: 1px solid rgba(255, 255, 255, .08);
+            padding-top: 12px;
+        }
+
+        .win-lb-title {
+            color: rgba(255, 255, 255, .3);
+            font-size: .72rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .win-lb-row {
             display: grid;
-            grid-template-columns: 36px 1fr 90px 70px;
-            gap: 8px;
-            padding: 10px 16px;
-            border-top: 1px solid rgba(255, 255, 255, .05);
+            grid-template-columns: 32px 1fr 68px;
+            gap: 6px;
             align-items: center;
+            padding: 7px 10px;
+            border-radius: 10px;
+            margin-bottom: 5px;
         }
 
-        .lb-data-row:nth-child(2) {
-            background: rgba(245, 166, 35, .07);
-            border-top-color: rgba(245, 166, 35, .15);
+        .win-lb-row.gold {
+            background: rgba(245, 166, 35, .14);
+            border: 1px solid rgba(245, 166, 35, .25);
         }
 
-        .lb-data-row .rk {
-            font-weight: 800;
-            font-size: .95rem;
+        .win-lb-row.silver {
+            background: rgba(160, 174, 192, .1);
+            border: 1px solid rgba(160, 174, 192, .15);
         }
 
-        .lb-data-row:nth-child(2) .rk {
-            color: #f5a623;
+        .win-lb-row.bronze {
+            background: rgba(205, 133, 63, .1);
+            border: 1px solid rgba(205, 133, 63, .15);
         }
 
-        .lb-data-row:nth-child(3) .rk {
-            color: #a0aec0;
+        .win-lb-row.normal {
+            background: rgba(255, 255, 255, .04);
+            border: 1px solid rgba(255, 255, 255, .05);
         }
 
-        .lb-data-row:nth-child(4) .rk {
-            color: #cd853f;
+        .win-lb-row.me {
+            outline: 2px solid rgba(240, 147, 251, .4);
         }
 
-        .lb-data-row .nm {
+        .wlr-rank {
+            font-size: 1rem;
+            text-align: center;
+        }
+
+        .wlr-name {
             color: #fff;
             font-weight: 600;
-            font-size: .9rem;
+            font-size: .82rem;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
         }
 
-        .lb-data-row .tm {
+        .wlr-time {
             color: #43e97b;
             font-weight: 700;
-            font-size: .9rem;
-        }
-
-        .lb-data-row .st {
-            font-size: .75rem;
-        }
-
-        .lb-no-data {
-            color: rgba(255, 255, 255, .25);
-            text-align: center;
-            padding: 24px;
-            font-size: .9rem;
+            font-size: .82rem;
+            text-align: right;
         }
 
         canvas#fw {
@@ -801,7 +880,7 @@
             }
 
             .win-card {
-                padding: 24px 20px;
+                padding: 22px 18px;
             }
         }
     </style>
@@ -810,44 +889,56 @@
 <body>
     <canvas id="fw"></canvas>
 
-    <!-- ══════ LOGIN ══════ -->
+    <!--═══ LOGIN ═══-->
     <div class="screen active" id="screen-login">
-        <div class="logo-wrap" style="padding-top:30px;">
+        <div style="text-align:center;padding-top:28px;">
             <span class="logo-emoji">🎮</span>
             <div class="logo-main">จับคู่แสนสนุก</div>
             <div class="logo-sub">Memory Match Game · 5 ด่าน</div>
         </div>
         <div class="login-card">
             <label class="login-label">✏️ พิมพ์ชื่อของคุณก่อนเล่น</label>
-            <input id="name-input" class="name-input" type="text" placeholder="ชื่อ-นามสกุล" maxlength="20"
+            <input id="name-input" class="name-input" type="text" placeholder="ชื่อ-นามสกุล / Nickname" maxlength="24"
                 autocomplete="off">
             <button id="btn-enter" class="btn-start" onclick="enterGame()" disabled>▶ เริ่มเล่นเลย!</button>
         </div>
-        <div class="lb-preview" id="lb-mini">
-            <div class="lb-title">🏆 อันดับผู้เร็วที่สุด</div>
-            <div id="lb-mini-rows"></div>
+        <div id="fb-notice-wrap" style="width:100%;max-width:380px;display:none;">
+            <div class="fb-notice">
+                ⚠️ <strong>โหมด Offline</strong> — สถิติถูกบันทึกเฉพาะในเครื่องนี้<br>
+                เพื่อให้ทุกคนเห็นสถิติร่วมกัน ให้ตั้งค่า Firebase:<br>
+                1. ไปที่ <a href="https://console.firebase.google.com"
+                    target="_blank">console.firebase.google.com</a><br>
+                2. สร้าง Project → Realtime Database → Start in test mode<br>
+                3. แก้ค่า FIREBASE_CONFIG ในไฟล์นี้
+            </div>
+        </div>
+        <div class="lb-preview">
+            <div class="lb-section-title">🏆 อันดับผู้เล่น — ใครเล่นเร็วสุด?</div>
+            <div id="lb-login-rows">
+                <div class="lb-loading">⏳ กำลังโหลดสถิติ...</div>
+            </div>
         </div>
     </div>
 
-    <!-- ══════ LEVEL SELECT ══════ -->
+    <!--═══ LEVEL SELECT ═══-->
     <div class="screen" id="screen-select">
-        <div class="logo-wrap">
-            <div class="logo-main" style="font-size:clamp(1.6rem,5vw,2.4rem);">จับคู่แสนสนุก</div>
+        <div style="text-align:center;">
+            <div class="logo-main" style="font-size:clamp(1.5rem,4vw,2.2rem);">จับคู่แสนสนุก</div>
         </div>
         <div class="player-bar">
-            <div>👤 <span class="player-name-tag" id="player-tag">-</span></div>
-            <button class="btn-logout" onclick="logout()">เปลี่ยนชื่อ</button>
+            <div>👤 <span id="player-tag" style="color:#f5a623;font-weight:700;">-</span></div>
+            <button class="btn-sm" onclick="logout()">เปลี่ยนชื่อ</button>
         </div>
         <div class="levels-grid" id="levels-grid"></div>
-        <button class="btn-sm" onclick="showLB()">🏆 ดูอันดับทั้งหมด</button>
+        <button class="btn-sm" onclick="showLBScreen()">🏆 ดูอันดับทั้งหมด</button>
     </div>
 
-    <!-- ══════ GAME ══════ -->
+    <!--═══ GAME ═══-->
     <div class="screen" id="screen-game">
         <div class="game-head">
             <div style="display:flex;gap:8px;align-items:center;">
                 <button class="btn-sm" onclick="goSelect()">← เมนู</button>
-                <div class="lv-badge-head" id="lv-badge-head">ด่าน 1</div>
+                <div class="lv-head" id="lv-head">ด่าน 1</div>
             </div>
             <div class="stats">
                 <div class="sbox">
@@ -867,29 +958,32 @@
         <div class="grid g4" id="grid"></div>
     </div>
 
-    <!-- ══════ LEADERBOARD FULL ══════ -->
+    <!--═══ LEADERBOARD SCREEN ═══-->
     <div class="screen" id="screen-lb">
-        <div class="logo-wrap">
-            <div class="logo-main" style="font-size:clamp(1.6rem,5vw,2.4rem);">🏆 อันดับผู้เล่น</div>
-            <div class="logo-sub">ผู้ที่เล่นครบ 5 ด่าน เรียงตามเวลาเร็วสุด</div>
+        <div style="text-align:center;">
+            <div class="logo-main" style="font-size:clamp(1.5rem,4vw,2.2rem);">🏆 อันดับผู้เล่น</div>
+            <div class="logo-sub">เรียงจากเวลารวมเร็วที่สุด · ผู้เล่นครบ 5 ด่าน</div>
         </div>
-        <div class="lb-full">
-            <div class="lb-head-row"><span>#</span><span>ชื่อ</span><span>เวลารวม</span><span>ดาว</span></div>
-            <div id="lb-rows"></div>
+        <div class="lb-full-wrap">
+            <div class="lb-head"><span>#</span><span>ชื่อผู้เล่น</span><span style="text-align:right;">เวลารวม</span>
+            </div>
+            <div id="lb-full-rows">
+                <div class="lb-loading">⏳ กำลังโหลด...</div>
+            </div>
         </div>
         <button class="btn-sm" onclick="goSelect()">← กลับ</button>
     </div>
 
-    <!-- ══════ WIN OVERLAY ══════ -->
+    <!--═══ WIN OVERLAY ═══-->
     <div id="win-ov">
         <div class="win-card">
             <div class="we" id="we">🏅</div>
             <div class="wt" id="wt">ผ่านด่านแล้ว!</div>
-            <div class="ws" id="ws">ด่าน 1 – ผลไม้สด</div>
+            <div class="ws" id="ws">ด่าน 1</div>
             <div class="stars-row" id="stars-row"></div>
             <div id="perfect-wrap" style="display:none;">
                 <div class="score100">🎊 100 คะแนน!</div>
-                <div style="color:rgba(255,255,255,.4);font-size:.82rem;margin-bottom:6px;">ผ่านครบทั้ง 5 ด่านแล้ว!
+                <div style="color:rgba(255,255,255,.38);font-size:.8rem;margin-bottom:6px;">ผ่านครบทั้ง 5 ด่านแล้ว!
                 </div>
             </div>
             <div class="win-meta">
@@ -897,21 +991,28 @@
                     <div class="wm-l">เวลาด่านนี้</div>
                     <div class="wm-v" id="wm-time">-</div>
                 </div>
-                <div class="wm-box">
-                    <div class="wm-l">เวลารวม</div>
-                    <div class="wm-v" id="wm-total">-</div>
+                <div class="wm-total-wrap">
+                    <div class="wm-box">
+                        <div class="wm-l">เวลารวม</div>
+                        <div class="wm-v" id="wm-total">-</div>
+                    </div>
                 </div>
                 <div class="wm-box">
                     <div class="wm-l">จำนวนครั้ง</div>
                     <div class="wm-v" id="wm-moves">-</div>
                 </div>
             </div>
+            <!-- Mini LB in win card -->
+            <div class="win-lb" id="win-lb-section" style="display:none;">
+                <div class="win-lb-title">🏆 อันดับผู้เล่นทั้งหมด</div>
+                <div id="win-lb-rows"></div>
+            </div>
             <div class="btns-row" id="win-btns"></div>
         </div>
     </div>
 
     <script>
-        // ══════════════════════════════════ CONFIG ══════════════════════════════════
+        // ══════════════ LEVELS ══════════════
         const LEVELS = [
             { id: 1, name: 'ผลไม้สด', icon: '🍓', cards: 12, cols: 4, desc: '6 คู่ • ผลไม้', items: ['🍓', '🍇', '🍊', '🍎', '🍌', '🥥'] },
             { id: 2, name: 'ผลไม้หวาน', icon: '🍒', cards: 12, cols: 4, desc: '6 คู่ • ผลไม้', items: ['🍒', '🍍', '🍉', '🥭', '🍐', '🥝'] },
@@ -920,135 +1021,158 @@
             { id: 5, name: 'ผักสดใส', icon: '🥕', cards: 16, cols: 4, desc: '8 คู่ • ผัก', items: ['🥒', '🥬', '🥕', '🥦', '🌿', '🍅', '🍆', '🍃'] }
         ];
         const FLIP_BACK = 1000;
-
-        // Star thresholds: [3-star max, 2-star max] in seconds
-        function getStarCount(lvId, secs) {
+        function getStars(lvId, secs) {
             if (lvId <= 2) return secs <= 50 ? 3 : secs <= 60 ? 2 : 1;
-            return secs <= 70 ? 3 : secs <= 90 ? 2 : 1; // 1m10s / 1m30s
+            return secs <= 70 ? 3 : secs <= 90 ? 2 : 1;
         }
 
-        // ══════════════════════════════════ STATE ══════════════════════════════════
+        // ══════════ STATE ══════════
         let playerName = '';
         let completedLevels = new Set();
-        let levelStars = {};       // {lvId: starCount}
-        let sessionTimes = {};     // {lvId: seconds}
+        let levelStars = {};
+        let sessionTimes = {};
         let currentLevel = null;
         let flipped = [], matched = 0, moves = 0, totalPairs = 0;
         let canFlip = true, timerInt = null, seconds = 0;
         let particles = [], fwInt = null;
+        let lbCache = [];
 
-        function loadStorage() {
-            const saved = localStorage.getItem('ml_completed_v2');
-            if (saved) completedLevels = new Set(JSON.parse(saved));
-            const stars = localStorage.getItem('ml_stars');
-            if (stars) levelStars = JSON.parse(stars);
-            const pname = localStorage.getItem('ml_player');
-            if (pname) playerName = pname;
+        function loadLocal() {
+            const c = localStorage.getItem('ml_completed_v3');
+            if (c) completedLevels = new Set(JSON.parse(c));
+            const s = localStorage.getItem('ml_stars_v3');
+            if (s) levelStars = JSON.parse(s);
+            playerName = localStorage.getItem('ml_player') || '';
         }
-        function saveStorage() {
-            localStorage.setItem('ml_completed_v2', JSON.stringify([...completedLevels]));
-            localStorage.setItem('ml_stars', JSON.stringify(levelStars));
+        function saveLocal() {
+            localStorage.setItem('ml_completed_v3', JSON.stringify([...completedLevels]));
+            localStorage.setItem('ml_stars_v3', JSON.stringify(levelStars));
             localStorage.setItem('ml_player', playerName);
         }
-        function getLeaderboard() {
-            return JSON.parse(localStorage.getItem('ml_leaderboard') || '[]');
-        }
-        function saveLeaderboard(lb) {
-            localStorage.setItem('ml_leaderboard', JSON.stringify(lb));
+
+        loadLocal();
+
+        // ══════════ FIREBASE / LEADERBOARD ══════════
+        async function fetchLB() {
+            if (window.__fbConfigured && window.__fbDB) {
+                return new Promise(resolve => {
+                    const lbRef = window.__fbQuery(window.__fbRef(window.__fbDB, 'leaderboard'), window.__fbOrderByChild('total'));
+                    window.__fbOnValue(lbRef, snap => {
+                        const data = [];
+                        snap.forEach(child => data.push(child.val()));
+                        data.sort((a, b) => a.total - b.total);
+                        lbCache = data;
+                        resolve(data);
+                    }, { onlyOnce: true });
+                });
+            }
+            // Fallback: localStorage
+            const lb = JSON.parse(localStorage.getItem('ml_leaderboard_v3') || '[]');
+            lb.sort((a, b) => a.total - b.total);
+            lbCache = lb;
+            return lb;
         }
 
-        // ══════════════════════════════════ LOGIN ══════════════════════════════════
-        loadStorage();
+        async function pushLB(entry) {
+            if (window.__fbConfigured && window.__fbDB) {
+                await window.__fbPush(window.__fbRef(window.__fbDB, 'leaderboard'), entry);
+            } else {
+                const lb = JSON.parse(localStorage.getItem('ml_leaderboard_v3') || '[]');
+                lb.push(entry);
+                lb.sort((a, b) => a.total - b.total);
+                localStorage.setItem('ml_leaderboard_v3', JSON.stringify(lb.slice(0, 100)));
+            }
+        }
+
+        // ══════════ RENDER LB ══════════
+        function rowClass(i) { return i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : 'normal'; }
+        function rankEmoji(i) { return i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}`; }
+
+        function renderLBRows(rows, containerId, highlightName = '', compact = false) {
+            const el = document.getElementById(containerId);
+            if (!rows || rows.length === 0) {
+                el.innerHTML = '<div class="lb-empty">ยังไม่มีผู้เล่นครบ 5 ด่าน<br>คุณจะเป็นคนแรก! 🌟</div>';
+                return;
+            }
+            const isWin = compact;
+            el.innerHTML = rows.map((r, i) => {
+                const isMe = r.name === highlightName;
+                const cls = isWin ? `win-lb-row ${rowClass(i)}${isMe ? ' me' : ''}` : `lb-row ${rowClass(i)}${isMe ? ' me' : ''}`;
+                const nameClass = isWin ? 'wlr-name' : 'lb-name';
+                const timeClass = isWin ? 'wlr-time' : 'lb-time';
+                const rankClass = isWin ? 'wlr-rank' : 'lb-rank';
+                return `<div class="${cls}">
+            <span class="${rankClass}">${rankEmoji(i)}</span>
+            <span class="${nameClass}">${r.name}${isMe ? ' 👈' : ''}</span>
+            <div class="${timeClass === 'lb-time' ? 'lb-meta' : ''}">
+                <div class="${timeClass}">${fmtTime(r.total)}</div>
+            </div>
+        </div>`;
+            }).join('');
+        }
+
+        async function refreshLoginLB() {
+            if (!window.__fbConfigured) {
+                document.getElementById('fb-notice-wrap').style.display = 'block';
+            }
+            const rows = await fetchLB();
+            renderLBRows(rows, 'lb-login-rows');
+        }
+
+        function showLBScreen() {
+            fetchLB().then(rows => renderLBRows(rows, 'lb-full-rows'));
+            showScreen('screen-lb');
+        }
+
+        // ══════════ LOGIN ══════════
         const nameInput = document.getElementById('name-input');
         const btnEnter = document.getElementById('btn-enter');
-        nameInput.addEventListener('input', () => {
-            btnEnter.disabled = nameInput.value.trim().length < 2;
-        });
+        nameInput.addEventListener('input', () => { btnEnter.disabled = nameInput.value.trim().length < 2; });
         nameInput.addEventListener('keydown', e => { if (e.key === 'Enter' && !btnEnter.disabled) enterGame(); });
         if (playerName) { nameInput.value = playerName; btnEnter.disabled = false; }
-        renderLBMini();
+        refreshLoginLB();
 
         function enterGame() {
-            const name = nameInput.value.trim();
-            if (name.length < 2) return;
-            playerName = name;
-            sessionTimes = {};
-            saveStorage();
-            renderSelect();
-            showScreen('screen-select');
+            const n = nameInput.value.trim();
+            if (n.length < 2) return;
+            playerName = n; sessionTimes = {};
+            saveLocal();
+            renderSelect(); showScreen('screen-select');
         }
-        function logout() { showScreen('screen-login'); renderLBMini(); }
+        function logout() { showScreen('screen-login'); refreshLoginLB(); }
 
-        // ══════════════════════════════════ LEADERBOARD ══════════════════════════════════
-        function renderLBMini() {
-            const lb = getLeaderboard();
-            const el = document.getElementById('lb-mini-rows');
-            if (lb.length === 0) { el.innerHTML = '<div class="lb-empty">ยังไม่มีผู้เล่นครบ 5 ด่าน</div>'; return; }
-            el.innerHTML = lb.slice(0, 5).map((r, i) => `
-        <div class="lb-row">
-            <span class="lb-rank">${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1}</span>
-            <span class="lb-name">${r.name}</span>
-            <span class="lb-time">${fmtTime(r.total)}</span>
-            <span class="lb-stars-sm">${'★'.repeat(r.stars)}${'☆'.repeat(Math.max(0, 15 - r.stars))}</span>
-        </div>`).join('');
-        }
-        function renderLBFull() {
-            const lb = getLeaderboard();
-            const el = document.getElementById('lb-rows');
-            if (lb.length === 0) { el.innerHTML = '<div class="lb-no-data">ยังไม่มีผู้เล่นครบ 5 ด่าน<br>คุณจะเป็นคนแรกได้!</div>'; return; }
-            el.innerHTML = lb.map((r, i) => `
-        <div class="lb-data-row">
-            <span class="rk">${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1}</span>
-            <span class="nm">${r.name}</span>
-            <span class="tm">${fmtTime(r.total)}</span>
-            <span class="st">${'⭐'.repeat(Math.min(r.stars, 15))}</span>
-        </div>`).join('');
-        }
-        function showLB() { renderLBFull(); showScreen('screen-lb'); }
-
-        function recordLeaderboard(totalSecs, totalStars) {
-            const lb = getLeaderboard();
-            lb.push({ name: playerName, total: totalSecs, stars: totalStars, date: new Date().toLocaleDateString('th-TH') });
-            lb.sort((a, b) => a.total - b.total);
-            saveLeaderboard(lb.slice(0, 50));
-        }
-
-        // ══════════════════════════════════ LEVEL SELECT ══════════════════════════════════
+        // ══════════ LEVEL SELECT ══════════
         function renderSelect() {
             document.getElementById('player-tag').textContent = playerName;
             const grid = document.getElementById('levels-grid');
             grid.innerHTML = '';
-            const maxUnlocked = completedLevels.size > 0 ? Math.max(...completedLevels) : 0;
+            const maxDone = completedLevels.size > 0 ? Math.max(...completedLevels) : 0;
             LEVELS.forEach(lv => {
                 const done = completedLevels.has(lv.id);
-                const locked = lv.id > maxUnlocked + 1;
+                const locked = lv.id > maxDone + 1;
                 const stars = levelStars[lv.id] || 0;
                 const div = document.createElement('div');
                 div.className = 'level-card' + (done ? ' completed' : '') + (locked ? ' locked' : '');
-                div.innerHTML = `
-            <div class="lv-badge">LV ${lv.id}</div>
+                div.innerHTML = `<div class="lv-num">LV ${lv.id}</div>
             <div class="lv-icon">${lv.icon}</div>
             <div class="lv-name">${lv.name}</div>
             <div class="lv-info">${lv.desc}</div>
-            <div class="lv-stars" style="${done ? 'color:#43e97b' : 'color:#fbd38d'}">${locked ? '🔒' : (done ? '★'.repeat(stars) + '☆'.repeat(3 - stars) : '☆☆☆')}</div>`;
+            <div class="lv-stars" style="${done ? 'color:#43e97b' : 'color:#fbd38d'}">${locked ? '🔒' : done ? '★'.repeat(stars) + '☆'.repeat(3 - stars) : '☆☆☆'}</div>`;
                 if (!locked) div.onclick = () => startLevel(lv);
                 grid.appendChild(div);
             });
         }
         function goSelect() { stopTimer(); renderSelect(); showScreen('screen-select'); }
 
-        // ══════════════════════════════════ GAME LOGIC ══════════════════════════════════
+        // ══════════ GAME ══════════
         function startLevel(lv) {
-            currentLevel = lv;
-            flipped = []; matched = 0; moves = 0; canFlip = true; seconds = 0;
-            totalPairs = lv.items.length;
-            stopTimer();
+            currentLevel = lv; flipped = []; matched = 0; moves = 0; canFlip = true; seconds = 0;
+            totalPairs = lv.items.length; stopTimer();
             document.getElementById('win-ov').classList.remove('show');
-            document.getElementById('lv-badge-head').textContent = `ด่าน ${lv.id} – ${lv.name}`;
+            document.getElementById('lv-head').textContent = `ด่าน ${lv.id} – ${lv.name}`;
             document.getElementById('pv').textContent = `0/${totalPairs}`;
             document.getElementById('mv').textContent = '0';
             document.getElementById('tv').textContent = '0:00';
-
             const grid = document.getElementById('grid');
             grid.className = 'grid ' + (lv.cols === 5 ? 'g5' : 'g4');
             const deck = shuffle([...lv.items, ...lv.items]);
@@ -1060,8 +1184,7 @@
                 c.addEventListener('click', () => onFlip(c));
                 grid.appendChild(c);
             });
-            showScreen('screen-game');
-            startTimer();
+            showScreen('screen-game'); startTimer();
         }
 
         function onFlip(card) {
@@ -1069,140 +1192,91 @@
             card.classList.add('flipped'); flipped.push(card);
             if (flipped.length === 2) { moves++; document.getElementById('mv').textContent = moves; canFlip = false; checkPair(); }
         }
-
         function checkPair() {
             const [a, b] = flipped;
             if (a.dataset.emoji === b.dataset.emoji) {
                 setTimeout(() => {
                     a.classList.add('matched'); b.classList.add('matched');
-                    matched++;
-                    document.getElementById('pv').textContent = `${matched}/${totalPairs}`;
-                    flipped = []; canFlip = true;
-                    if (matched === totalPairs) onWin();
+                    matched++; document.getElementById('pv').textContent = `${matched}/${totalPairs}`;
+                    flipped = []; canFlip = true; if (matched === totalPairs) onWin();
                 }, 350);
             } else {
                 a.classList.add('wrong'); b.classList.add('wrong');
                 addBadge(a); addBadge(b);
-                setTimeout(() => {
-                    removeBadge(a); removeBadge(b);
-                    a.classList.remove('flipped', 'wrong'); b.classList.remove('flipped', 'wrong');
-                    flipped = []; canFlip = true;
-                }, FLIP_BACK);
+                setTimeout(() => { removeBadge(a); removeBadge(b); a.classList.remove('flipped', 'wrong'); b.classList.remove('flipped', 'wrong'); flipped = []; canFlip = true; }, FLIP_BACK);
             }
         }
         function addBadge(c) { removeBadge(c); const b = document.createElement('div'); b.className = 'cbadge'; b.textContent = '1'; c.style.position = 'relative'; c.appendChild(b); }
         function removeBadge(c) { const b = c.querySelector('.cbadge'); if (b) b.remove(); }
 
-        // ══════════════════════════════════ WIN ══════════════════════════════════
-        function onWin() {
+        // ══════════ WIN ══════════
+        async function onWin() {
             stopTimer();
             sessionTimes[currentLevel.id] = seconds;
-            const starsEarned = getStarCount(currentLevel.id, seconds);
-
-            // Update best stars
-            if (!levelStars[currentLevel.id] || starsEarned > levelStars[currentLevel.id])
-                levelStars[currentLevel.id] = starsEarned;
-
-            // Mark completed (progressively unlock up to this level)
+            const starsEarned = getStars(currentLevel.id, seconds);
+            if (!levelStars[currentLevel.id] || starsEarned > levelStars[currentLevel.id]) levelStars[currentLevel.id] = starsEarned;
             for (let i = 1; i <= currentLevel.id; i++) completedLevels.add(i);
-            saveStorage();
+            saveLocal();
 
             const totalSecs = Object.values(sessionTimes).reduce((a, b) => a + b, 0);
-            const totalStarsSession = Object.values(sessionTimes).reduce((acc, s, idx, arr) => {
-                const lvId = Object.keys(sessionTimes)[idx];
-                return acc + getStarCount(Number(lvId), s);
-            }, 0);
-
-            const allDone = LEVELS.every(lv => completedLevels.has(lv.id)) && Object.keys(sessionTimes).length === 5;
+            const allDone = currentLevel.id === 5 && Object.keys(sessionTimes).length === 5;
             const nextLv = LEVELS.find(lv => lv.id === currentLevel.id + 1);
-            const thisTime = fmtTime(seconds);
 
-            // Stars row
+            // Stars
             const starsRow = document.getElementById('stars-row');
             starsRow.innerHTML = '';
-            for (let i = 1; i <= 3; i++) {
-                const s = document.createElement('span');
-                s.className = 'star' + (i > starsEarned ? ' grey' : '');
-                s.textContent = '⭐'; starsRow.appendChild(s);
-            }
+            for (let i = 1; i <= 3; i++) { const s = document.createElement('span'); s.className = 'star' + (i > starsEarned ? ' grey' : ''); s.textContent = '⭐'; starsRow.appendChild(s); }
 
             document.getElementById('we').textContent = allDone ? '🥇' : (starsEarned === 3 ? '🏆' : starsEarned === 2 ? '🥈' : '🥉');
-            document.getElementById('wt').textContent = allDone ? '🎊 จบแล้ว! 🎊' : (starsEarned === 3 ? 'ยอดเยี่ยม!' : starsEarned === 2 ? 'เก่งมาก!' : 'ผ่านแล้ว!');
-            document.getElementById('ws').textContent = allDone ? 'คุณผ่านครบทั้ง 5 ด่าน!' : `ด่าน ${currentLevel.id} – ${currentLevel.name}`;
-            document.getElementById('wm-time').textContent = thisTime;
+            document.getElementById('wt').textContent = allDone ? '🎊 จบครบแล้ว!' : (starsEarned === 3 ? 'ยอดเยี่ยม!' : starsEarned === 2 ? 'เก่งมาก!' : 'ผ่านแล้ว!');
+            document.getElementById('ws').textContent = allDone ? `${playerName} ผ่านครบ 5 ด่าน!` : `ด่าน ${currentLevel.id} – ${currentLevel.name}`;
+            document.getElementById('wm-time').textContent = fmtTime(seconds);
             document.getElementById('wm-total').textContent = fmtTime(totalSecs);
             document.getElementById('wm-moves').textContent = `${moves} ครั้ง`;
             document.getElementById('perfect-wrap').style.display = allDone ? 'block' : 'none';
 
-            // Save leaderboard entry when all 5 done
+            // Save & show LB when all done
             if (allDone) {
-                const totalStars = Object.entries(levelStars).reduce((a, [, v]) => a + v, 0);
-                recordLeaderboard(totalSecs, totalStars);
+                const totalStars = Object.values(levelStars).reduce((a, b) => a + b, 0);
+                await pushLB({ name: playerName, total: totalSecs, stars: totalStars, date: new Date().toLocaleDateString('th-TH') });
+                const rows = await fetchLB();
+                const section = document.getElementById('win-lb-section');
+                section.style.display = 'block';
+                renderLBRows(rows, 'win-lb-rows', playerName, true);
+            } else {
+                document.getElementById('win-lb-section').style.display = 'none';
             }
 
             // Buttons
             const btnDiv = document.getElementById('win-btns');
             btnDiv.innerHTML = '';
             if (nextLv) {
-                const nb = document.createElement('button'); nb.className = 'btn-n btn-next';
-                nb.textContent = `▶ ด่าน ${nextLv.id}`;
-                nb.onclick = () => { document.getElementById('win-ov').classList.remove('show'); startLevel(nextLv); };
-                btnDiv.appendChild(nb);
+                const nb = document.createElement('button'); nb.className = 'btn-n btn-next'; nb.textContent = `▶ ด่าน ${nextLv.id}`;
+                nb.onclick = () => { document.getElementById('win-ov').classList.remove('show'); startLevel(nextLv); }; btnDiv.appendChild(nb);
             }
             const rb = document.createElement('button'); rb.className = 'btn-n btn-replay';
-            if (allDone) {
-                rb.textContent = '🏠 หน้าหลัก';
-                rb.onclick = () => { document.getElementById('win-ov').classList.remove('show'); renderSelect(); showScreen('screen-select'); };
-            } else {
-                rb.textContent = '🔄 เล่นด่านนี้อีก';
-                rb.onclick = () => { document.getElementById('win-ov').classList.remove('show'); startLevel(currentLevel); };
-            }
+            if (allDone) { rb.textContent = '🏠 หน้าหลัก'; rb.onclick = () => { document.getElementById('win-ov').classList.remove('show'); renderSelect(); showScreen('screen-select'); }; }
+            else { rb.textContent = '🔄 เล่นด่านนี้อีก'; rb.onclick = () => { document.getElementById('win-ov').classList.remove('show'); startLevel(currentLevel); }; }
             btnDiv.appendChild(rb);
 
-            setTimeout(() => {
-                document.getElementById('win-ov').classList.add('show');
-                launchFireworks(allDone ? 22 : 8);
-            }, 500);
+            setTimeout(() => { document.getElementById('win-ov').classList.add('show'); launchFireworks(allDone ? 22 : 8); }, 500);
         }
 
-        // ══════════════════════════════════ TIMER ══════════════════════════════════
-        function startTimer() {
-            timerInt = setInterval(() => {
-                seconds++;
-                document.getElementById('tv').textContent = `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
-            }, 1000);
-        }
+        // ══════════ TIMER ══════════
+        function startTimer() { timerInt = setInterval(() => { seconds++; document.getElementById('tv').textContent = `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`; }, 1000); }
         function stopTimer() { clearInterval(timerInt); timerInt = null; }
-
-        // ══════════════════════════════════ HELPERS ══════════════════════════════════
-        function shuffle(arr) { const a = [...arr]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1));[a[i], a[j]] = [a[j], a[i]]; } return a; }
         function fmtTime(s) { return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; }
+        function shuffle(arr) { const a = [...arr]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1));[a[i], a[j]] = [a[j], a[i]]; } return a; }
         function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
 
-        // ══════════════════════════════════ FIREWORKS ══════════════════════════════════
+        // ══════════ FIREWORKS ══════════
         const fwc = document.getElementById('fw'), fwx = fwc.getContext('2d');
         function rFW() { fwc.width = innerWidth; fwc.height = innerHeight; } rFW(); window.addEventListener('resize', rFW);
-        const COLORS = ['#f093fb', '#f5a623', '#43e97b', '#4facfe', '#fa709a', '#fee140', '#a18cd1', '#fbc2eb', '#43c6ac'];
+        const COLORS = ['#f093fb', '#f5a623', '#43e97b', '#4facfe', '#fa709a', '#fee140', '#a18cd1', '#43c6ac'];
         function rC() { return COLORS[Math.floor(Math.random() * COLORS.length)]; }
-        function burst(x, y, n = 55) { for (let i = 0; i < n; i++) { const a = (Math.PI * 2 / n) * i, sp = 2 + Math.random() * 5; particles.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, alpha: 1, color: rC(), size: 2 + Math.random() * 3, g: .09 }); } }
-        function animFW() {
-            fwx.clearRect(0, 0, fwc.width, fwc.height);
-            particles.forEach(p => {
-                p.x += p.vx; p.y += p.vy; p.vy += p.g; p.alpha -= .015;
-                fwx.beginPath(); fwx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                fwx.fillStyle = p.color + Math.floor(p.alpha * 255).toString(16).padStart(2, '0'); fwx.fill();
-            });
-            particles = particles.filter(p => p.alpha > 0);
-            if (particles.length > 0 || fwInt) requestAnimationFrame(animFW);
-        }
-        function launchFireworks(count = 10) {
-            particles = []; let n = 0;
-            fwInt = setInterval(() => {
-                burst(80 + Math.random() * (innerWidth - 160), 60 + Math.random() * (innerHeight * .55), 65);
-                n++; if (n >= count) { clearInterval(fwInt); fwInt = null; }
-            }, 280);
-            requestAnimationFrame(animFW);
-        }
+        function burst(x, y, n = 55) { for (let i = 0; i < n; i++) { const a = (Math.PI * 2 / n) * i, sp = 1.8 + Math.random() * 5; particles.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, alpha: 1, color: rC(), size: 1.8 + Math.random() * 3, g: .09 }); } }
+        function animFW() { fwx.clearRect(0, 0, fwc.width, fwc.height); particles.forEach(p => { p.x += p.vx; p.y += p.vy; p.vy += p.g; p.alpha -= .015; fwx.beginPath(); fwx.arc(p.x, p.y, p.size, 0, Math.PI * 2); fwx.fillStyle = p.color + Math.floor(p.alpha * 255).toString(16).padStart(2, '0'); fwx.fill(); }); particles = particles.filter(p => p.alpha > 0); if (particles.length > 0 || fwInt) requestAnimationFrame(animFW); }
+        function launchFireworks(count = 10) { particles = []; let n = 0; fwInt = setInterval(() => { burst(80 + Math.random() * (innerWidth - 160), 60 + Math.random() * (innerHeight * .52), 62); n++; if (n >= count) { clearInterval(fwInt); fwInt = null; } }, 280); requestAnimationFrame(animFW); }
     </script>
 </body>
 
