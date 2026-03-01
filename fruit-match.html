@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🍓 Fruit Match – เกมจับคู่ผลไม้</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Kanit', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 40%, #0f3460 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            padding: 20px;
+        }
+
+        /* ─── Header ─── */
+        .header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .header h1 {
+            font-size: clamp(1.8rem, 5vw, 2.8rem);
+            font-weight: 800;
+            background: linear-gradient(135deg, #f093fb, #f5a623, #43e97b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: none;
+            letter-spacing: -0.5px;
+        }
+
+        .header p {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.9rem;
+            margin-top: 4px;
+        }
+
+        /* ─── Stats Bar ─── */
+        .stats {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+
+        .stat-box {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 12px;
+            padding: 8px 20px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-box .label {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-box .value {
+            color: #fff;
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        #timer-val {
+            color: #f5a623;
+        }
+
+        #pairs-val {
+            color: #43e97b;
+        }
+
+        #moves-val {
+            color: #f093fb;
+        }
+
+        /* ─── Grid ─── */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            max-width: 520px;
+            width: 100%;
+        }
+
+        /* ─── Card ─── */
+        .card {
+            aspect-ratio: 1;
+            cursor: pointer;
+            perspective: 600px;
+            user-select: none;
+        }
+
+        .card-inner {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 16px;
+        }
+
+        .card.flipped .card-inner,
+        .card.matched .card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .card-front,
+        .card-back {
+            position: absolute;
+            inset: 0;
+            border-radius: 16px;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* BACK (question mark side) */
+        .card-back {
+            background: linear-gradient(135deg, #2d3748, #4a5568);
+            border: 2px solid rgba(255, 255, 255, 0.12);
+            font-size: 2rem;
+            color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        .card:hover:not(.flipped):not(.matched) .card-back {
+            background: linear-gradient(135deg, #3d4f69, #5a6a8a);
+            transform: translateY(-2px);
+        }
+
+        .card:hover:not(.flipped):not(.matched) .card-inner {
+            filter: brightness(1.1);
+        }
+
+        /* FRONT (fruit side) */
+        .card-front {
+            background: linear-gradient(135deg, #ffffff, #f0f4ff);
+            transform: rotateY(180deg);
+            font-size: clamp(2rem, 6vw, 3rem);
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+        }
+
+        /* Matched glow */
+        .card.matched .card-front {
+            background: linear-gradient(135deg, #c6f6d5, #9ae6b4);
+            border-color: #48bb78;
+            box-shadow: 0 0 20px rgba(72, 187, 120, 0.6), 0 8px 30px rgba(0, 0, 0, 0.2);
+            animation: matchPop 0.4s ease;
+        }
+
+        @keyframes matchPop {
+            0% {
+                transform: rotateY(180deg) scale(1);
+            }
+
+            50% {
+                transform: rotateY(180deg) scale(1.15);
+            }
+
+            100% {
+                transform: rotateY(180deg) scale(1);
+            }
+        }
+
+        /* Wrong shake */
+        .card.wrong .card-inner {
+            animation: shake 0.4s ease;
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: rotateY(180deg) translateX(0);
+            }
+
+            20% {
+                transform: rotateY(180deg) translateX(-6px);
+            }
+
+            40% {
+                transform: rotateY(180deg) translateX(6px);
+            }
+
+            60% {
+                transform: rotateY(180deg) translateX(-6px);
+            }
+
+            80% {
+                transform: rotateY(180deg) translateX(4px);
+            }
+        }
+
+        /* ─── Restart Button ─── */
+        .btn-restart {
+            margin-top: 20px;
+            padding: 10px 28px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.7);
+            border-radius: 50px;
+            cursor: pointer;
+            font-family: 'Kanit', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            transition: all 0.2s;
+        }
+
+        .btn-restart:hover {
+            background: rgba(255, 255, 255, 0.18);
+            color: #fff;
+            transform: translateY(-1px);
+        }
+
+        /* ─── Win Overlay ─── */
+        #win-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        #win-overlay.show {
+            display: flex;
+        }
+
+        .win-card {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 28px;
+            padding: 40px 50px;
+            text-align: center;
+            max-width: 380px;
+            width: 90%;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+            animation: slideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(60px) scale(0.8);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+        }
+
+        .win-emoji {
+            font-size: 3.5rem;
+            margin-bottom: 8px;
+        }
+
+        .win-title {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #f5a623, #f093fb, #43e97b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 6px;
+        }
+
+        .win-subtitle {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.95rem;
+            margin-bottom: 24px;
+        }
+
+        /* Stars */
+        .stars {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .star {
+            font-size: 3rem;
+            opacity: 0;
+            transform: scale(0) rotate(-30deg);
+            animation: starPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        .star:nth-child(1) {
+            animation-delay: 0.2s;
+        }
+
+        .star:nth-child(2) {
+            animation-delay: 0.4s;
+        }
+
+        .star:nth-child(3) {
+            animation-delay: 0.6s;
+        }
+
+        @keyframes starPop {
+            to {
+                opacity: 1;
+                transform: scale(1) rotate(0deg);
+            }
+        }
+
+        .win-stats {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            margin-bottom: 28px;
+        }
+
+        .win-stat {
+            text-align: center;
+        }
+
+        .win-stat .wlabel {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.7rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .win-stat .wvalue {
+            color: #fff;
+            font-size: 1.4rem;
+            font-weight: 700;
+        }
+
+        .btn-play-again {
+            padding: 14px 36px;
+            background: linear-gradient(135deg, #f093fb, #f5a623);
+            border: none;
+            border-radius: 50px;
+            color: #fff;
+            font-family: 'Kanit', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            letter-spacing: 0.5px;
+            box-shadow: 0 8px 24px rgba(240, 147, 251, 0.4);
+            transition: all 0.2s;
+        }
+
+        .btn-play-again:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(240, 147, 251, 0.5);
+        }
+
+        /* ─── Fireworks Canvas ─── */
+        #fireworks {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 99;
+        }
+
+        /* ─── Countdown Badge ─── */
+        .countdown-badge {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: #e53e3e;
+            color: #fff;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 700;
+            z-index: 10;
+            animation: countPulse 1s infinite;
+        }
+
+        @keyframes countPulse {
+
+            0%,
+            100% {
+                transform: scale(1)
+            }
+
+            50% {
+                transform: scale(1.2)
+            }
+        }
+
+        @media (max-width: 420px) {
+            .grid {
+                gap: 10px;
+                max-width: 360px;
+            }
+
+            .card-front {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <canvas id="fireworks"></canvas>
+
+    <div class="header">
+        <h1>🍓 เกมจับคู่ผลไม้</h1>
+        <p>เปิดภาพคู่ที่เหมือนกันให้ครบทั้ง 6 คู่แล้วชนะ!</p>
+    </div>
+
+    <div class="stats">
+        <div class="stat-box">
+            <div class="label">⏱ เวลา</div>
+            <div class="value" id="timer-val">0:00</div>
+        </div>
+        <div class="stat-box">
+            <div class="label">✅ คู่</div>
+            <div class="value" id="pairs-val">0/6</div>
+        </div>
+        <div class="stat-box">
+            <div class="label">🖱️ ครั้ง</div>
+            <div class="value" id="moves-val">0</div>
+        </div>
+    </div>
+
+    <div class="grid" id="grid"></div>
+
+    <button class="btn-restart" onclick="startGame()">🔄 เล่นใหม่</button>
+
+    <!-- Win Overlay -->
+    <div id="win-overlay">
+        <div class="win-card">
+            <div class="win-emoji">🏆</div>
+            <div class="win-title">ยอดเยี่ยม!</div>
+            <div class="win-subtitle">คุณจับคู่ผลไม้ครบทั้ง 6 คู่แล้ว!</div>
+            <div class="stars">
+                <span class="star">⭐</span>
+                <span class="star">⭐</span>
+                <span class="star">⭐</span>
+            </div>
+            <div class="win-stats">
+                <div class="win-stat">
+                    <div class="wlabel">เวลา</div>
+                    <div class="wvalue" id="win-time">-</div>
+                </div>
+                <div class="win-stat">
+                    <div class="wlabel">จำนวนครั้ง</div>
+                    <div class="wvalue" id="win-moves">-</div>
+                </div>
+            </div>
+            <button class="btn-play-again" onclick="startGame()">🎮 เล่นอีกครั้ง</button>
+        </div>
+    </div>
+
+    <script>
+        const FRUITS = ['🍓', '🍇', '🍊', '🍎', '🍌', '🥥'];
+        const FLIP_BACK_DELAY = 3000; // 3 วินาที ถ้าผิด
+
+        let cards = [];
+        let flipped = [];
+        let matched = 0;
+        let moves = 0;
+        let canFlip = true;
+        let timerInterval = null;
+        let seconds = 0;
+
+        // ─── Fisher-Yates Shuffle ───
+        function shuffle(arr) {
+            const a = [...arr];
+            for (let i = a.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [a[i], a[j]] = [a[j], a[i]];
+            }
+            return a;
+        }
+
+        // ─── Start / Restart ───
+        function startGame() {
+            // Reset state
+            cards = [];
+            flipped = [];
+            matched = 0;
+            moves = 0;
+            canFlip = true;
+            seconds = 0;
+            stopTimer();
+
+            // Reset UI
+            document.getElementById('win-overlay').classList.remove('show');
+            document.getElementById('pairs-val').textContent = '0/6';
+            document.getElementById('moves-val').textContent = '0';
+            document.getElementById('timer-val').textContent = '0:00';
+
+            // Build deck: 6 pairs → 12 cards
+            const deck = shuffle([...FRUITS, ...FRUITS]);
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
+
+            deck.forEach((fruit, idx) => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.dataset.fruit = fruit;
+                card.dataset.idx = idx;
+                card.innerHTML = `
+                    <div class="card-inner">
+                        <div class="card-back">?</div>
+                        <div class="card-front">${fruit}</div>
+                    </div>`;
+                card.addEventListener('click', () => onCardClick(card));
+                grid.appendChild(card);
+                cards.push(card);
+            });
+
+            startTimer();
+        }
+
+        // ─── Card Click ───
+        function onCardClick(card) {
+            if (!canFlip) return;
+            if (card.classList.contains('flipped')) return;
+            if (card.classList.contains('matched')) return;
+            if (flipped.length >= 2) return;
+
+            card.classList.add('flipped');
+            flipped.push(card);
+
+            if (flipped.length === 2) {
+                moves++;
+                document.getElementById('moves-val').textContent = moves;
+                canFlip = false;
+                checkMatch();
+            }
+        }
+
+        // ─── Check Match ───
+        function checkMatch() {
+            const [a, b] = flipped;
+            if (a.dataset.fruit === b.dataset.fruit) {
+                // ✅ Match!
+                setTimeout(() => {
+                    a.classList.add('matched');
+                    b.classList.add('matched');
+                    matched++;
+                    document.getElementById('pairs-val').textContent = `${matched}/6`;
+                    flipped = [];
+                    canFlip = true;
+                    if (matched === 6) onWin();
+                }, 400);
+            } else {
+                // ❌ No match — show countdown then flip back
+                let countdown = Math.ceil(FLIP_BACK_DELAY / 1000);
+                a.classList.add('wrong');
+                b.classList.add('wrong');
+
+                // Add countdown badge to both cards
+                addBadge(a, countdown);
+                addBadge(b, countdown);
+
+                const tick = setInterval(() => {
+                    countdown--;
+                    updateBadge(a, countdown);
+                    updateBadge(b, countdown);
+                    if (countdown <= 0) clearInterval(tick);
+                }, 1000);
+
+                setTimeout(() => {
+                    clearInterval(tick);
+                    removeBadge(a);
+                    removeBadge(b);
+                    a.classList.remove('flipped', 'wrong');
+                    b.classList.remove('flipped', 'wrong');
+                    flipped = [];
+                    canFlip = true;
+                }, FLIP_BACK_DELAY);
+            }
+        }
+
+        function addBadge(card, n) {
+            removeBadge(card);
+            const badge = document.createElement('div');
+            badge.className = 'countdown-badge';
+            badge.id = `badge-${card.dataset.idx}`;
+            badge.textContent = n;
+            card.style.position = 'relative';
+            card.appendChild(badge);
+        }
+        function updateBadge(card, n) {
+            const b = card.querySelector('.countdown-badge');
+            if (b) b.textContent = n;
+        }
+        function removeBadge(card) {
+            const b = card.querySelector('.countdown-badge');
+            if (b) b.remove();
+        }
+
+        // ─── Timer ───
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                seconds++;
+                const m = Math.floor(seconds / 60);
+                const s = String(seconds % 60).padStart(2, '0');
+                document.getElementById('timer-val').textContent = `${m}:${s}`;
+            }, 1000);
+        }
+        function stopTimer() {
+            clearInterval(timerInterval);
+            timerInterval = null;
+        }
+
+        // ─── Win ───
+        function onWin() {
+            stopTimer();
+            const m = Math.floor(seconds / 60);
+            const s = String(seconds % 60).padStart(2, '0');
+            document.getElementById('win-time').textContent = `${m}:${s}`;
+            document.getElementById('win-moves').textContent = `${moves} ครั้ง`;
+
+            setTimeout(() => {
+                document.getElementById('win-overlay').classList.add('show');
+                launchFireworks();
+            }, 600);
+        }
+
+        // ─── Fireworks ───
+        const canvas = document.getElementById('fireworks');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let fwInterval = null;
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resize();
+        window.addEventListener('resize', resize);
+
+        function randomColor() {
+            const colors = ['#f093fb', '#f5a623', '#43e97b', '#4facfe', '#fa709a', '#fee140', '#a18cd1', '#fbc2eb'];
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+
+        function createBurst(x, y) {
+            const count = 60;
+            for (let i = 0; i < count; i++) {
+                const angle = (Math.PI * 2 / count) * i;
+                const speed = 2 + Math.random() * 5;
+                particles.push({
+                    x, y,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed,
+                    alpha: 1,
+                    color: randomColor(),
+                    size: 2 + Math.random() * 3,
+                    gravity: 0.08
+                });
+            }
+        }
+
+        function animateFireworks() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += p.gravity;
+                p.alpha -= 0.015;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fillStyle = p.color + Math.floor(p.alpha * 255).toString(16).padStart(2, '0');
+                ctx.fill();
+            });
+            particles = particles.filter(p => p.alpha > 0);
+            if (particles.length > 0 || fwInterval) requestAnimationFrame(animateFireworks);
+        }
+
+        function launchFireworks() {
+            particles = [];
+            let count = 0;
+            fwInterval = setInterval(() => {
+                const x = 100 + Math.random() * (window.innerWidth - 200);
+                const y = 80 + Math.random() * (window.innerHeight * 0.6);
+                createBurst(x, y);
+                count++;
+                if (count >= 12) { clearInterval(fwInterval); fwInterval = null; }
+            }, 250);
+            requestAnimationFrame(animateFireworks);
+        }
+
+        // ─── Start ───
+        startGame();
+    </script>
+</body>
+
+</html>
