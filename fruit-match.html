@@ -977,7 +977,18 @@
             renderSelect();
             showScreen('screen-select');
         }
-        function logout() { showScreen('screen-login'); renderLBMini(); }
+        function logout() {
+            playerName = '';
+            nameInput.value = '';
+            sessionTimes = {};
+            completedLevels.clear();
+            levelStars = {};
+            saveStorage();
+
+            showScreen('screen-login');
+            btnEnter.disabled = true;
+            renderLBMini();
+        }
 
         // ══════════════════════════════════ LEADERBOARD ══════════════════════════════════
         function renderLBMini() {
