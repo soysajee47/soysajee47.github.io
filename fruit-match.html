@@ -1018,10 +1018,28 @@
         function showLB() { renderLBFull(); showScreen('screen-lb'); }
 
         function recordLeaderboard(totalSecs, totalStars) {
-            const lb = getLeaderboard();
-            lb.push({ name: playerName, total: totalSecs, stars: totalStars, date: new Date().toLocaleDateString('th-TH') });
+            let lb = [];
+            try {
+                lb = JSON.parse(localStorage.getItem('ml_leaderboard')) || [];
+            } catch (e) {
+                lb = [];
+            }
+
+            // Add new entry
+            lb.push({
+                name: playerName || 'Unknown',
+                total: totalSecs,
+                stars: totalStars,
+                date: new Date().toLocaleDateString('th-TH')
+            });
+
+            // Sort by fastest time
             lb.sort((a, b) => a.total - b.total);
-            saveLeaderboard(lb.slice(0, 50));
+
+            // Keep top 100
+            lb = lb.slice(0, 100);
+
+            localStorage.setItem('ml_leaderboard', JSON.stringify(lb));
         }
 
         // ══════════════════════════════════ LEVEL SELECT ══════════════════════════════════
