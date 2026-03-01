@@ -35,11 +35,11 @@
 
         @keyframes shimmer {
             0% {
-                background-position: 200% 0;
+                background-position: 200% 0
             }
 
             100% {
-                background-position: -200% 0;
+                background-position: -200% 0
             }
         }
     </style>
@@ -47,12 +47,13 @@
 
 <body class="p-4 md:p-8">
     <div id="app" class="max-w-6xl mx-auto space-y-6">
-        <!-- Header Section -->
+
+        <!-- Header -->
         <header
             class="glass-card rounded-2xl p-6 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
             <div>
-                <h1 class="text-2xl font-bold text-slate-900" id="store-nickname">Loading...</h1>
-                <p class="text-slate-500" id="store-description">Connecting to JIBCHAIN L1...</p>
+                <h1 class="text-2xl font-bold text-slate-900" id="store-nickname">กำลังโหลด...</h1>
+                <p class="text-slate-500" id="store-description">กำลังเชื่อมต่อ JIBCHAIN L1...</p>
                 <div class="mt-2 flex items-center space-x-2 text-sm text-slate-400">
                     <span id="store-address-link" class="flex items-center hover:text-blue-500 cursor-pointer">
                         <span id="store-address-truncated">0x...</span>
@@ -74,16 +75,17 @@
 
         <!-- Main Card -->
         <main class="glass-card rounded-2xl shadow-lg flex flex-col overflow-hidden">
-            <!-- Controls Overlay (Top) -->
+
+            <!-- Controls -->
             <div class="p-4 md:p-6 border-b border-slate-100 flex flex-wrap items-center justify-between gap-4">
                 <div class="flex items-center space-x-2">
                     <button onclick="switchChart('waterDepth')" id="btn-water-depth"
                         class="px-4 py-2 rounded-lg text-sm font-semibold transition-all bg-blue-500 text-white shadow-md">
-                        Water Depth
+                        💧 Water Depth
                     </button>
                     <button onclick="switchChart('batteryVoltage')" id="btn-battery-voltage"
                         class="px-4 py-2 rounded-lg text-sm font-semibold transition-all bg-slate-100 text-slate-600 hover:bg-slate-200">
-                        Battery Voltage
+                        🔋 Battery Voltage
                     </button>
                 </div>
                 <div class="flex items-center space-x-3">
@@ -92,33 +94,31 @@
                         <option value="0xCd3Ec17ddFDa24f8F97131fa0FDf20e7cbd1A8Bb">FloodBoy001</option>
                         <option value="0x0994Bc66b2863f8D58C8185b1ed6147895632812" selected>FloodBoy016</option>
                     </select>
-                    <select id="group-interval"
-                        class="bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-lg block p-2">
-                        <option value="30">30 Min</option>
-                        <option value="60">1 Hour</option>
-                    </select>
                     <div class="flex space-x-1">
                         <button onclick="toggleFields()" class="p-2 text-slate-400 hover:text-slate-600"
-                            title="Show/Hide Fields">
-                            <i data-lucide="layers" class="w-5 h-5"></i>
+                            title="Show/Hide Table">
+                            <i data-lucide="table" class="w-5 h-5"></i>
                         </button>
                         <button onclick="toggleFullscreen()" class="p-2 text-slate-400 hover:text-slate-600"
-                            title="Maximize">
+                            title="Fullscreen">
                             <i data-lucide="maximize" class="w-5 h-5"></i>
                         </button>
                     </div>
                 </div>
             </div>
 
-            <!-- Chart Section -->
+            <!-- Chart -->
             <div class="p-6">
                 <div id="chart-loading" class="chart-container rounded-xl loading-shimmer hidden"></div>
                 <div id="chart-parent" class="chart-container">
                     <canvas id="sensorChart"></canvas>
+                    <div id="chart-status-text"
+                        class="absolute inset-0 flex items-center justify-center text-slate-400 text-sm pointer-events-none">
+                    </div>
                 </div>
             </div>
 
-            <!-- Table Section -->
+            <!-- Table -->
             <div class="overflow-x-auto" id="table-container">
                 <table class="w-full text-left border-collapse">
                     <thead class="bg-slate-50 text-slate-500 text-xs font-semibold uppercase tracking-wider">
@@ -130,12 +130,15 @@
                         </tr>
                     </thead>
                     <tbody id="data-table-body" class="text-slate-700 divide-y divide-slate-100">
-                        <!-- Rows injected here -->
+                        <tr>
+                            <td colspan="4" class="px-6 py-10 text-center text-slate-300">⏳ กำลังเชื่อมต่อ Blockchain...
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
 
-            <!-- Footer Section -->
+            <!-- Footer -->
             <footer class="p-6 bg-slate-50 border-t border-slate-100 grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
                 <div class="space-y-1">
                     <span class="text-slate-400 block uppercase text-[10px] font-bold tracking-widest">Store
@@ -156,36 +159,42 @@
                     </a>
                 </div>
                 <div class="space-y-1">
-                    <span class="text-slate-400 block uppercase text-[10px] font-bold tracking-widest">Sensors</span>
+                    <span class="text-slate-400 block uppercase text-[10px] font-bold tracking-widest">Authorized
+                        Sensors</span>
                     <div class="flex items-center space-x-2">
                         <span id="sensor-count"
                             class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs font-bold">0</span>
-                        <span class="text-slate-600 font-medium">Authorized Scanner</span>
+                        <span class="text-slate-600 font-medium">Scanner</span>
                     </div>
                 </div>
             </footer>
         </main>
+
+        <p class="text-center text-xs text-slate-400 pb-4">
+            ⛓️ JIBCHAIN L1 (Chain ID: 8899) |
+            <a href="https://exp.jibchain.net" target="_blank" class="hover:text-blue-500">exp.jibchain.net ↗</a>
+        </p>
     </div>
 
-    <!-- Scripts -->
     <script type="module">
-        import { createPublicClient, http, parseAbi } from 'https://esm.sh/viem';
+        import { createPublicClient, http, parseAbi } from 'https://esm.sh/viem@2.17.5';
 
-        // Configuration
+        // ═══════════════ CONFIG ═══════════════
         const JIBCHAIN = {
             id: 8899,
             name: 'JIBCHAIN L1',
+            nativeCurrency: { name: 'JBC', symbol: 'JBC', decimals: 18 },
             rpcUrls: { default: { http: ['https://rpc-l1.jibchain.net'] } },
             blockExplorers: { default: { name: 'JibExp', url: 'https://exp.jibchain.net' } }
         };
-
         const FACTORY_ADDRESS = '0x63bB41b79b5aAc6e98C7b35Dcb0fE941b85Ba5Bb';
         const UNIVERSAL_SIGNER = '0xcB0e58b011924e049ce4b4D62298Edf43dFF0BDd';
+        const BLOCK_CHUNK = 2000n;        // JIBCHAIN RPC max block range per request
+        const LOOK_BACK = 28800n;         // ~24h at 3s/block
 
         const FACTORY_ABI = parseAbi([
             'function getStoreInfo(address store) view returns (string nickname, address owner, uint256 authorizedSensorCount, uint128 deployedBlock, string description)'
         ]);
-
         const STORE_ABI = parseAbi([
             'function getAllFields() view returns ((string name, string unit, string dtype)[])',
             'function getLatestRecord(address sensor) view returns (uint256 timestamp, int256[] values)',
@@ -194,306 +203,294 @@
 
         const client = createPublicClient({ chain: JIBCHAIN, transport: http() });
 
-        // State Management
+        // ═══════════════ STATE ═══════════════
         let currentStore = '0x0994Bc66b2863f8D58C8185b1ed6147895632812';
         let currentChartType = 'waterDepth';
         let chartInstance = null;
         let historicalData = [];
         let fieldConfigs = [];
 
-        // UI Manipulation Helper
         const $ = (id) => document.getElementById(id);
 
+        // ═══════════════ INIT ═══════════════
         async function init() {
             lucide.createIcons();
-            await refreshData();
+            $('chart-parent').style.position = 'relative';
+            await loadAll();
         }
 
-        async function refreshData() {
+        async function loadAll() {
+            showLoading(true);
+            setStatus('⏳ กำลังเชื่อมต่อ JIBCHAIN L1...');
+
+            // Step 1: Store metadata
             try {
-                showLoading(true);
-
-                // 1. Fetch Store Metadata
                 const [nickname, owner, sensorCount, deployedBlock, description] = await client.readContract({
-                    address: FACTORY_ADDRESS,
-                    abi: FACTORY_ABI,
-                    functionName: 'getStoreInfo',
-                    args: [currentStore]
+                    address: FACTORY_ADDRESS, abi: FACTORY_ABI,
+                    functionName: 'getStoreInfo', args: [currentStore]
                 });
+                updateMeta({ nickname, owner, sensorCount, deployedBlock, description });
+            } catch (e) { console.error('getStoreInfo failed:', e); }
 
-                updateMetadataUI({ nickname, owner, sensorCount, deployedBlock, description });
-
-                // 2. Fetch Field Configs & Latest Data
-                [fieldConfigs, [latestTimestamp, latestValues]] = await Promise.all([
+            // Step 2: Fields + Latest record
+            try {
+                const [fields, [ts, vals]] = await Promise.all([
                     client.readContract({ address: currentStore, abi: STORE_ABI, functionName: 'getAllFields' }),
                     client.readContract({ address: currentStore, abi: STORE_ABI, functionName: 'getLatestRecord', args: [UNIVERSAL_SIGNER] })
                 ]);
-
-                updateTableUI(latestTimestamp, latestValues);
-
-                // 3. Fetch Historical Data (Events)
-                await fetchHistory();
-
-                renderChart();
-                updateCurrentBlock();
-            } catch (err) {
-                console.error("Data Fetch Error:", err);
-                alert("Failed to fetch blockchain data. Please check your connection.");
-            } finally {
-                showLoading(false);
+                fieldConfigs = fields;
+                buildTable(ts, vals);
+            } catch (e) {
+                console.error('getLatestRecord or getAllFields failed:', e);
+                $('data-table-body').innerHTML = `<tr><td colspan="4" class="px-6 py-8 text-center text-slate-400">❌ ไม่พบข้อมูลล่าสุด: ${e.shortMessage || e.message}</td></tr>`;
             }
+
+            // Step 3: Current block + paginated history
+            try {
+                const block = await client.getBlockNumber();
+                $('current-block').innerText = `Block: ${block.toLocaleString()}`;
+                await fetchHistory(block);
+            } catch (e) {
+                console.error('History fetch failed:', e);
+                setStatus('❌ ดึงประวัติไม่สำเร็จ — ' + (e.shortMessage || e.message));
+            }
+
+            buildChart();
+            showLoading(false);
         }
 
-        async function fetchHistory() {
-            const currentBlock = await client.getBlockNumber();
-            const fromBlock = currentBlock - 28800n; // ~24h (3s blocks)
+        // ═══════════════ PAGINATED HISTORY ═══════════════
+        async function fetchHistory(latestBlock) {
+            const wdIdx = findIdx('water_depth');
+            const bvIdx = findIdx('battery_voltage');
+            const startBlock = latestBlock - LOOK_BACK;
+            let from = startBlock < 0n ? 0n : startBlock;
 
-            const events = await client.getContractEvents({
-                address: currentStore,
-                abi: STORE_ABI,
-                eventName: 'RecordStored',
-                fromBlock: fromBlock,
-                args: { sensor: UNIVERSAL_SIGNER }
-            });
+            const numChunks = Math.ceil(Number(LOOK_BACK) / Number(BLOCK_CHUNK));
+            let done = 0;
+            let allEvts = [];
 
-            const wdIdx = findFieldIndex('water_depth');
-            const bvIdx = findFieldIndex('battery_voltage');
-
-            historicalData = events.map(e => ({
-                t: Number(e.args.timestamp) * 1000,
-                wd: wdIdx !== -1 ? Number(e.args.values[wdIdx]) / 10000 : null,
-                bv: bvIdx !== -1 ? Number(e.args.values[bvIdx]) / 100 : null
-            })).sort((a, b) => a.t - b.t);
-
-            // Simple Data Smoothing (3-point moving average)
-            if (historicalData.length > 3) {
-                historicalData = historicalData.map((d, i, arr) => {
-                    if (i < 1 || i > arr.length - 2) return d;
-                    return {
-                        ...d,
-                        wd: (arr[i - 1].wd + d.wd + arr[i + 1].wd) / 3,
-                        bv: (arr[i - 1].bv + d.bv + arr[i + 1].bv) / 3
-                    };
-                });
-            }
-        }
-
-        function updateMetadataUI(data) {
-            $('store-nickname').innerText = data.nickname;
-            $('store-description').innerText = data.description;
-            $('store-address-truncated').innerText = truncateAddress(currentStore);
-            $('owner-address').innerText = truncateAddress(data.owner);
-            $('sensor-count').innerText = data.sensorCount.toString();
-            $('deployed-block-number').innerText = `#${data.deployedBlock}`;
-
-            const expUrl = JIBCHAIN.blockExplorers.default.url;
-            $('owner-link').href = `${expUrl}/address/${data.owner}`;
-            $('deployed-block-link').href = `${expUrl}/block/${data.deployedBlock}`;
-            $('store-address-link').onclick = () => window.open(`${expUrl}/address/${currentStore}`, '_blank');
-        }
-
-        function updateTableUI(timestamp, values) {
-            const date = new Date(Number(timestamp) * 1000);
-            $('last-updated-time').innerText = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            // Format: MM/dd/yyyy, h:mm:ss AM/PM
-            const fullDateStr = date.toLocaleString('en-US', {
-                year: 'numeric', month: '2-digit', day: '2-digit',
-                hour: 'numeric', minute: '2-digit', second: '2-digit',
-                hour12: true
-            });
-            $('last-updated-date').innerText = fullDateStr.split(',')[0];
-
-            const tbody = $('data-table-body');
-            tbody.innerHTML = '';
-
-            const fieldsToDisplay = [];
-            const waterDepthIdx = findFieldIndex('water_depth');
-            const waterDepthCountIdx = findFieldIndex('water_depth_count');
-            const batteryIdx = findFieldIndex('battery_voltage');
-            const heightIdx = findFieldIndex('installation_height');
-
-            if (batteryIdx !== -1) {
-                const config = fieldConfigs[batteryIdx];
-                fieldsToDisplay.push({
-                    name: formatFieldName(config.name),
-                    current: processValue(values[batteryIdx], config.unit),
-                    min: processValue(values[batteryIdx + 1], config.unit),
-                    max: processValue(values[batteryIdx + 2], config.unit)
-                });
+            while (from <= latestBlock) {
+                const to = from + BLOCK_CHUNK - 1n > latestBlock ? latestBlock : from + BLOCK_CHUNK - 1n;
+                try {
+                    const evts = await client.getContractEvents({
+                        address: currentStore, abi: STORE_ABI,
+                        eventName: 'RecordStored',
+                        fromBlock: from, toBlock: to,
+                        args: { sensor: UNIVERSAL_SIGNER }
+                    });
+                    allEvts = allEvts.concat(evts);
+                } catch (e) {
+                    console.warn(`Chunk ${from}→${to} failed: ${e.shortMessage || e.message}`);
+                }
+                from = to + 1n;
+                done++;
+                const pct = Math.round((done / numChunks) * 100);
+                setStatus(`⛓️ ดึงข้อมูลประวัติ... ${pct}%  (พบ ${allEvts.length} รายการ)`);
             }
 
-            if (heightIdx !== -1) {
-                const config = fieldConfigs[heightIdx];
-                fieldsToDisplay.push({
-                    name: formatFieldName(config.name),
-                    current: processValue(values[heightIdx], config.unit),
-                    min: processValue(values[heightIdx], config.unit),
-                    max: processValue(values[heightIdx], config.unit)
-                });
-            }
-
-            if (waterDepthIdx !== -1) {
-                const config = fieldConfigs[waterDepthIdx];
-                const sampleCount = waterDepthCountIdx !== -1 ? values[waterDepthCountIdx].toString() : '?';
-                fieldsToDisplay.push({
-                    name: `Water Depth (${sampleCount} samples)`,
-                    current: processValue(values[waterDepthIdx], config.unit),
-                    min: processValue(values[waterDepthIdx + 1], config.unit),
-                    max: processValue(values[waterDepthIdx + 2], config.unit)
-                });
-            }
-
-            fieldsToDisplay.forEach((f, idx) => {
-                const row = document.createElement('tr');
-                row.className = idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50';
-                row.innerHTML = `
-                    <td class="px-6 py-4 font-semibold text-slate-900">${f.name}</td>
-                    <td class="px-6 py-4 text-blue-600 font-bold">${f.current}</td>
-                    <td class="px-6 py-4 text-slate-500">${f.min}</td>
-                    <td class="px-6 py-4 text-slate-500">${f.max}</td>
-                `;
-                tbody.appendChild(row);
-            });
-        }
-
-        function renderChart() {
-            const ctx = $('sensorChart').getContext('2d');
-            if (chartInstance) chartInstance.destroy();
-
-            if (historicalData.length === 0) {
-                drawEmptyChartState();
+            if (allEvts.length === 0) {
+                setStatus('📭 ไม่พบข้อมูลในช่วง 24 ชั่วโมงที่ผ่านมา');
+                historicalData = [];
                 return;
             }
 
+            // Map & sort
+            let raw = allEvts
+                .filter(e => e.args && e.args.values)
+                .map(e => ({
+                    t: Number(e.args.timestamp) * 1000,
+                    wd: wdIdx !== -1 ? Number(e.args.values[wdIdx]) / 10000 : null,
+                    bv: bvIdx !== -1 ? Number(e.args.values[bvIdx]) / 100 : null
+                }))
+                .sort((a, b) => a.t - b.t);
+
+            // 5-point moving average
+            historicalData = raw.map((d, i, arr) => {
+                const w = 2;
+                const sl = arr.slice(Math.max(0, i - w), Math.min(arr.length, i + w + 1));
+                const ma = (key) => {
+                    const valid = sl.filter(x => x[key] !== null);
+                    return valid.length ? valid.reduce((s, x) => s + x[key], 0) / valid.length : d[key];
+                };
+                return { t: d.t, wd: ma('wd'), bv: ma('bv') };
+            });
+
+            setStatus('');
+        }
+
+        // ═══════════════ CHART ═══════════════
+        function buildChart() {
+            if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
+            if (!historicalData || historicalData.length === 0) return;
+
+            setStatus('');
             const isWD = currentChartType === 'waterDepth';
             const color = isWD ? '#3B82F6' : '#10B981';
-            const label = isWD ? 'Water Depth Over Time' : 'Battery Voltage Over Time';
-            const dataKey = isWD ? 'wd' : 'bv';
+            const unit = isWD ? 'm' : 'V';
+            const key = isWD ? 'wd' : 'bv';
 
-            chartInstance = new Chart(ctx, {
+            // Downsample for performance (max 300 points)
+            let pts = historicalData;
+            if (pts.length > 300) {
+                const step = Math.ceil(pts.length / 300);
+                pts = pts.filter((_, i) => i % step === 0);
+            }
+
+            chartInstance = new Chart($('sensorChart').getContext('2d'), {
                 type: 'line',
                 data: {
-                    labels: historicalData.map(d => new Date(d.t).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })),
+                    labels: pts.map(d => new Date(d.t).toLocaleString('th-TH', {
+                        month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                    })),
                     datasets: [{
-                        label: label,
-                        data: historicalData.map(d => d[dataKey]),
+                        label: isWD ? 'Water Depth (m)' : 'Battery Voltage (V)',
+                        data: pts.map(d => d[key] !== null ? +d[key].toFixed(isWD ? 4 : 3) : null),
                         borderColor: color,
-                        backgroundColor: color + '20',
-                        fill: true,
-                        tension: 0.4,
-                        borderWidth: 3,
-                        pointRadius: 2,
-                        pointHoverRadius: 6
+                        backgroundColor: color + '1A',
+                        fill: true, tension: 0.4, borderWidth: 2.5,
+                        pointRadius: pts.length > 150 ? 0 : 2,
+                        pointHoverRadius: 5,
+                        spanGaps: true
                     }]
                 },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
+                    responsive: true, maintainAspectRatio: false,
                     interaction: { mode: 'index', intersect: false },
+                    animations: { duration: 500 },
                     plugins: {
                         legend: { display: false },
                         tooltip: {
-                            backgroundColor: '#1E293B',
-                            titleFont: { size: 13 },
-                            bodyFont: { size: 14, weight: 'bold' },
-                            padding: 12,
-                            cornerRadius: 8,
+                            backgroundColor: '#1e293b', padding: 12, cornerRadius: 8,
                             callbacks: {
-                                label: (ctx) => ` ${ctx.parsed.y.toFixed(isWD ? 4 : 3)} ${isWD ? 'm' : 'V'}`
+                                title: (items) => new Date(pts[items[0].dataIndex]?.t).toLocaleString('th-TH'),
+                                label: (ctx) => ctx.parsed.y !== null ? ` ${ctx.parsed.y.toFixed(isWD ? 4 : 3)} ${unit}` : ' N/A'
                             }
                         }
                     },
                     scales: {
                         y: {
-                            border: { display: false },
-                            grid: { color: '#f1f5f9' },
-                            ticks: {
-                                font: { family: 'Inter', size: 11 },
-                                callback: (v) => v + (isWD ? 'm' : 'V'),
-                                title: { display: true, text: isWD ? 'Water Depth (m)' : 'Voltage (V)', font: { weight: 'bold' } }
-                            }
+                            border: { display: false }, grid: { color: '#f1f5f9' },
+                            ticks: { font: { family: 'Inter', size: 11 }, callback: v => v + unit }
                         },
                         x: {
                             grid: { display: false },
-                            ticks: { font: { family: 'Inter', size: 10 }, maxRotation: 0 }
+                            ticks: { font: { family: 'Inter', size: 9 }, maxRotation: 0, maxTicksLimit: 8 }
                         }
                     }
                 }
             });
         }
 
-        // Processing Utils
-        function processValue(value, unit) {
-            const baseUnit = unit.replace(/ x\d+/, '');
-            const num = Number(value);
-            if (unit.includes('x10000')) return (num / 10000).toFixed(4) + ' ' + baseUnit;
-            if (unit.includes('x1000')) return (num / 1000).toFixed(3) + ' ' + baseUnit;
-            if (unit.includes('x100')) return (num / 100).toFixed(3) + ' ' + baseUnit;
+        // ═══════════════ TABLE ═══════════════
+        function buildTable(timestamp, values) {
+            const d = new Date(Number(timestamp) * 1000);
+            $('last-updated-time').innerText = d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+            $('last-updated-date').innerText = d.toLocaleDateString('en-US');
+
+            const rows = [];
+            const bvIdx = findIdx('battery_voltage');
+            const hiIdx = findIdx('installation_height');
+            const wdIdx = findIdx('water_depth');
+            const cntIdx = fieldConfigs.findIndex(f => f.name.toLowerCase().includes('water_depth_count'));
+
+            if (bvIdx !== -1) {
+                const u = fieldConfigs[bvIdx].unit;
+                rows.push({ n: fmtName(fieldConfigs[bvIdx].name), c: fmtVal(values[bvIdx], u), mn: fmtVal(values[bvIdx + 1], u), mx: fmtVal(values[bvIdx + 2], u) });
+            }
+            if (hiIdx !== -1) {
+                const u = fieldConfigs[hiIdx].unit;
+                const v = fmtVal(values[hiIdx], u);
+                rows.push({ n: fmtName(fieldConfigs[hiIdx].name), c: v, mn: v, mx: v });
+            }
+            if (wdIdx !== -1) {
+                const u = fieldConfigs[wdIdx].unit;
+                const cnt = cntIdx !== -1 ? Number(values[cntIdx]) : '?';
+                rows.push({ n: `Water Depth (${cnt} samples)`, c: fmtVal(values[wdIdx], u), mn: fmtVal(values[wdIdx + 1], u), mx: fmtVal(values[wdIdx + 2], u) });
+            }
+
+            const tbody = $('data-table-body');
+            if (rows.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-8 text-center text-slate-400">ไม่พบ Field Configuration</td></tr>';
+                return;
+            }
+            tbody.innerHTML = rows.map((r, i) => `
+                <tr class="${i % 2 === 0 ? 'bg-white' : 'bg-slate-50/60'}">
+                    <td class="px-6 py-4 font-semibold text-slate-800">${r.n}</td>
+                    <td class="px-6 py-4 text-blue-600 font-bold">${r.c}</td>
+                    <td class="px-6 py-4 text-slate-500">${r.mn}</td>
+                    <td class="px-6 py-4 text-slate-500">${r.mx}</td>
+                </tr>`).join('');
+        }
+
+        // ═══════════════ META ═══════════════
+        function updateMeta({ nickname, owner, sensorCount, deployedBlock, description }) {
+            $('store-nickname').innerText = nickname;
+            $('store-description').innerText = description;
+            $('store-address-truncated').innerText = short(currentStore);
+            $('owner-address').innerText = short(owner);
+            $('sensor-count').innerText = sensorCount.toString();
+            $('deployed-block-number').innerText = `#${deployedBlock}`;
+            const base = JIBCHAIN.blockExplorers.default.url;
+            $('owner-link').href = `${base}/address/${owner}`;
+            $('deployed-block-link').href = `${base}/block/${deployedBlock}`;
+            $('store-address-link').onclick = () => window.open(`${base}/address/${currentStore}`, '_blank');
+        }
+
+        // ═══════════════ HELPERS ═══════════════
+        function fmtVal(value, unit) {
+            const base = unit.replace(/ x\d+/, '');
+            const n = Number(value);
+            if (unit.includes('x10000')) return (n / 10000).toFixed(4) + ' ' + base;
+            if (unit.includes('x1000')) return (n / 1000).toFixed(3) + ' ' + base;
+            if (unit.includes('x100')) return (n / 100).toFixed(3) + ' ' + base;
             return value + ' ' + unit;
         }
-
-        function formatFieldName(fieldName) {
-            return fieldName
-                .split('_')
-                .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-                .join(' ');
+        function fmtName(name) {
+            return name.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
         }
-
-        function findFieldIndex(query) {
-            return fieldConfigs.findIndex(f => f.name.toLowerCase().includes(query) && !f.name.includes('min') && !f.name.includes('max'));
+        function findIdx(q) {
+            return fieldConfigs.findIndex(f =>
+                f.name.toLowerCase().includes(q) &&
+                !f.name.toLowerCase().includes('min') &&
+                !f.name.toLowerCase().includes('max') &&
+                !f.name.toLowerCase().includes('count'));
         }
-
-        function truncateAddress(addr) {
-            return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
+        function short(addr) { return `${addr.slice(0, 6)}...${addr.slice(-4)}`; }
+        function setStatus(msg) {
+            const el = $('chart-status-text');
+            el.innerText = msg;
+            el.style.display = msg ? 'flex' : 'none';
         }
-
-        async function updateCurrentBlock() {
-            const block = await client.getBlockNumber();
-            $('current-block').innerText = `Block: ${block}`;
-        }
-
         function showLoading(show) {
             $('chart-loading').classList.toggle('hidden', !show);
             $('chart-parent').classList.toggle('hidden', show);
         }
 
-        // Global Callbacks for UI
+        // ═══════════════ CONTROLS ═══════════════
         window.switchChart = (type) => {
             currentChartType = type;
-            $('btn-water-depth').className = type === 'waterDepth' ? 'px-4 py-2 rounded-lg text-sm font-semibold transition-all bg-blue-500 text-white shadow-md' : 'px-4 py-2 rounded-lg text-sm font-semibold transition-all bg-slate-100 text-slate-600 hover:bg-slate-200';
-            $('btn-battery-voltage').className = type === 'batteryVoltage' ? 'px-4 py-2 rounded-lg text-sm font-semibold transition-all bg-emerald-500 text-white shadow-md' : 'px-4 py-2 rounded-lg text-sm font-semibold transition-all bg-slate-100 text-slate-600 hover:bg-slate-200';
-            renderChart();
+            $('btn-water-depth').className = type === 'waterDepth'
+                ? 'px-4 py-2 rounded-lg text-sm font-semibold transition-all bg-blue-500 text-white shadow-md'
+                : 'px-4 py-2 rounded-lg text-sm font-semibold transition-all bg-slate-100 text-slate-600 hover:bg-slate-200';
+            $('btn-battery-voltage').className = type === 'batteryVoltage'
+                ? 'px-4 py-2 rounded-lg text-sm font-semibold transition-all bg-emerald-500 text-white shadow-md'
+                : 'px-4 py-2 rounded-lg text-sm font-semibold transition-all bg-slate-100 text-slate-600 hover:bg-slate-200';
+            buildChart();
         };
-
         window.switchStore = async (addr) => {
             currentStore = addr;
-            await refreshData();
+            historicalData = []; fieldConfigs = [];
+            await loadAll();
         };
-
-        window.toggleFields = () => {
-            const container = $('table-container');
-            container.classList.toggle('hidden');
-        }
-
+        window.toggleFields = () => $('table-container').classList.toggle('hidden');
         window.toggleFullscreen = () => {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen();
-            } else if (document.exitFullscreen) {
-                document.exitFullscreen();
-            }
-        }
-
-        function drawEmptyChartState() {
-            const ctx = $('sensorChart').getContext('2d');
-            ctx.font = '14px Inter';
-            ctx.fillStyle = '#94a3b8';
-            ctx.textAlign = 'center';
-            ctx.fillText('No historical data available for this range', ctx.canvas.width / 2, ctx.canvas.height / 2);
-        }
+            if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+            else document.exitFullscreen();
+        };
 
         init();
     </script>
-
 </body>
 
 </html>
