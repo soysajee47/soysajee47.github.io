@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Portfolio</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Prompt:wght@300;400;500;600&display=swap');
+
+        :root {
+            --bg-color: #0f172a;
+            --text-color: #f8fafc;
+            --primary-color: #3b82f6;
+            --secondary-color: #8b5cf6;
+            --card-bg: rgba(255, 255, 255, 0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Prompt', sans-serif;
+        }
+
+        h1,
+        h2,
+        h3,
+        .logo {
+            font-family: 'Outfit', 'Prompt', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 1.5rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+        }
+
+        nav .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        nav a {
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        nav a:hover {
+            color: var(--primary-color);
+        }
+
+        /* Hero Section */
+        #home {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 0 10%;
+            position: relative;
+        }
+
+        .hero-content {
+            max-width: 600px;
+            z-index: 10;
+        }
+
+        .hero-content h1 {
+            font-size: 4rem;
+            line-height: 1.2;
+            margin-bottom: 1rem;
+            font-weight: 800;
+        }
+
+        .hero-content h1 span {
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-content p {
+            font-size: 1.2rem;
+            color: #cbd5e1;
+            margin-bottom: 2rem;
+            font-weight: 300;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 1rem 2rem;
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 500;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(59, 130, 246, 0.4);
+        }
+
+        /* Abstract Shape */
+        .shape {
+            position: absolute;
+            right: 5%;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 450px;
+            height: 450px;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+            animation: morph 8s ease-in-out infinite;
+            opacity: 0.5;
+            filter: blur(50px);
+            z-index: 0;
+        }
+
+        @keyframes morph {
+            0% {
+                border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+            }
+
+            50% {
+                border-radius: 70% 30% 30% 70% / 70% 70% 30% 30%;
+            }
+
+            100% {
+                border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+            }
+        }
+
+        /* Sections */
+        section {
+            padding: 5rem 10%;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+        }
+
+        /* About Grid */
+        .about-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .about-text p {
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            color: #cbd5e1;
+            font-weight: 300;
+        }
+
+        /* Projects */
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .project-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease, background 0.3s ease;
+        }
+
+        .project-card:hover {
+            transform: translateY(-10px);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .project-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .project-card p {
+            color: #cbd5e1;
+            margin-bottom: 1.5rem;
+            font-weight: 300;
+        }
+
+        .project-tags {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            padding: 0.3rem 0.8rem;
+            background: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+
+        .map-container {
+            width: 100%;
+            height: 300px;
+            border-radius: 15px;
+            overflow: hidden;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        .map-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* Contact */
+        #contact {
+            text-align: center;
+        }
+
+        .contact-content {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .contact-content p {
+            font-size: 1.2rem;
+            color: #cbd5e1;
+            margin-bottom: 2rem;
+            font-weight: 300;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #94a3b8;
+            font-weight: 300;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-content h1 {
+                font-size: 3rem;
+            }
+
+            .about-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .shape {
+                width: 300px;
+                height: 300px;
+            }
+
+            nav ul {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav>
+        <div class="logo">Portfolio.</div>
+        <ul>
+            <li><a href="#home">หน้าแรก</a></li>
+            <li><a href="#about">เกี่ยวกับฉัน</a></li>
+            <li><a href="#projects">ผลงาน</a></li>
+            <li><a href="#contact">ติดต่อ</a></li>
+        </ul>
+    </nav>
+
+    <section id="home">
+        <div class="shape"></div>
+        <div class="hero-content">
+            <h1>สวัสดีค่ะ <br>ฉันชื่อ <br><span>สร้อยศจี จันทวงค์</span></h1>
+            <p>นักพัฒนาเว็บไซต์และนักออกแบบ UI ที่หลงใหลในการสร้างสรรค์ประสบการณ์ยุคดิจิทัลที่สวยงามและใช้งานง่าย</p>
+            <a href="#contact" class="btn">พูดคุยกันได้เลย</a>
+        </div>
+    </section>
+
+    <section id="about">
+        <h2 class="section-title">เกี่ยวกับฉัน</h2>
+        <div class="about-grid">
+            <div class="about-image">
+                <div
+                    style="width: 100%; height: 300px; background: rgba(59, 130, 246, 0.1); border-radius: 20px; border: 1px solid rgba(59, 130, 246, 0.3); display: flex; align-items: center; justify-content: center;">
+                    <span style="color: #60a5fa; font-size: 5rem;">🧑‍💻</span>
+                </div>
+            </div>
+            <div class="about-text">
+                <p>สวัสดี! ฉันเป็นผู้ที่ชื่นชอบเทคโนโลยีและรักในการเขียนโค้ด
+                    ฉันมุ่งเน้นไปที่การสร้างเว็บไซต์และแอปพลิเคชันที่มอบประสบการณ์ที่ยอดเยี่ยมให้แก่ผู้ใช้งาน</p>
+                <p>การเดินทางในสายเทคโนโลยีของฉันทำให้ฉันได้เรียนรู้ทักษะที่หลากหลาย
+                    เพื่อแก้ไขปัญหาที่ซับซ้อนและส่งมอบผลงานที่มีคุณภาพสูงที่สุด</p>
+                <br>
+                <h3>ทักษะความเชี่ยวชาญ</h3>
+                <div class="project-tags" style="margin-top: 1rem;">
+                    <span class="tag">HTML/CSS</span>
+                    <span class="tag">JavaScript</span>
+                    <span class="tag">React</span>
+                    <span class="tag">Node.js</span>
+                    <span class="tag">UI/UX Design</span>
+                    <span class="tag">Python</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="projects">
+        <h2 class="section-title">ผลงานที่โดดเด่น</h2>
+        <div class="projects-grid">
+
+            <div class="project-card">
+                <h3>🚂 3D Northern Express</h3>
+                <p>รถไฟแห่งความสุข! จำลองการเดินทาง 3D ทะลุผ่านป่าดอกไม้หลากสี โดยคำนวณจากข้อมูลพิกัด GPS จริง
+                    พร้อมระบบควันที่สมจริง
+                </p>
+                <div class="project-tags">
+                    <span class="tag">Three.js</span>
+                    <span class="tag">GPU Instancing</span>
+                    <span class="tag">GPS Data</span>
+                </div>
+                <br>
+                <a href="soysajee47.github.io/travel-3d.html" class="tag"
+                    style="background: var(--primary-color); color: white; text-decoration: none;">ดูผลงาน</a>
+            </div>
+
+            <div class="project-card">
+                <h3>📡 DustBoy Cyber-Dashboard</h3>
+                <p>แดชบอร์ดคุณภาพอากาศแบบ Real-time ดึงข้อมูลจริงจากเครือข่ายเซนเซอร์ DustBoy ผ่าน MQTT
+                    พร้อมระบบแสดงผลแบบ Cyberpunk
+                </p>
+                <div class="project-tags">
+                    <span class="tag">MQTT.js</span>
+                    <span class="tag">WebSocket</span>
+                    <span class="tag">IoT Dashboard</span>
+                </div>
+                <br>
+                <a href="soysajee47.github.io/dustboy.html" class="tag"
+                    style="background: var(--primary-color); color: white; text-decoration: none;">ดูผลงาน</a>
+            </div>
+
+            <div class="project-card">
+                <h3>📄 Modern Minimalist CV</h3>
+                <p>ประวัติส่วนตัวฉบับย่อ ดีไซน์ทันสมัย เน้นความรวดเร็วและเรียบง่าย
+                    สำหรับโปรเจกต์นักเรียนและนักพัฒนาเริ่มต้น
+                </p>
+                <div class="project-tags">
+                    <span class="tag">Semantic HTML</span>
+                    <span class="tag">Clean CSS</span>
+                    <span class="tag">Non-Build</span>
+                </div>
+                <br>
+                <a href="soysajee47.github.io/cv-v2/index.html" class="tag"
+                    style="background: var(--primary-color); color: white; text-decoration: none;">ดูผลงาน</a>
+            </div>
+
+            <div class="project-card" style="grid-column: 1 / -1;">
+                <h3>📍 Live GPS Northern Journey</h3>
+                <div class="map-container">
+                    <iframe src="https://soysajee47.github.io/index.html" title="GPS Map"></iframe>
+                </div>
+                <p>แผนที่การเดินทางเชิงโต้ตอบแบบ Real-time แสดงพิกัด GPS ตลอดเส้นทางจากเชียงใหม่มายังพิษณุโลก
+                    พร้อมระบุสถานะอุปกรณ์และเวลาแบบละเอียด สามารถย่อขยายและคลิกดูจุดต่างๆ ได้ทันที
+                </p>
+                <div class="project-tags">
+                    <span class="tag">Leaflet.js</span>
+                    <span class="tag">GeoJSON</span>
+                    <span class="tag">Interactive Map</span>
+                    <span class="tag">Embedded Iframe</span>
+                </div>
+                <br>
+                <a href="https://soysajee47.github.io/index.html" class="tag"
+                    style="background: var(--primary-color); color: white; text-decoration: none;">เปิดหน้าเต็ม</a>
+            </div>
+
+        </div>
+    </section>
+
+    <section id="contact">
+        <h2 class="section-title">ช่องทางการติดต่อ</h2>
+        <div class="contact-content">
+            <p>ฉันพร้อมเปิดรับโอกาสใหม่ๆ เสมอ หากคุณมีคำถาม หรือเพียงแค่ต้องการทักทาย สามารถส่งอีเมลมาหาฉันได้เลย
+                แล้วฉันจะรีบตอบกลับโดยเร็วที่สุด!</p>
+            <a href="mailto:your.email@example.com" class="btn">ส่งข้อความหาฉัน</a>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2026 สร้อยศจี จันทวงค์. สร้างสรรค์ด้วย ❤️ โดยใช้ HTML & CSS.</p>
+    </footer>
+
+</body>
+
+</html>
