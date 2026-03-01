@@ -983,7 +983,10 @@
             sessionTimes = {};
             completedLevels.clear();
             levelStars = {};
-            saveStorage();
+
+            localStorage.removeItem('ml_completed_v2');
+            localStorage.removeItem('ml_stars');
+            localStorage.removeItem('ml_player');
 
             showScreen('screen-login');
             btnEnter.disabled = true;
