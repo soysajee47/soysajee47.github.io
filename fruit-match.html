@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🍓 Fruit Match – เกมจับคู่ผลไม้</title>
+    <title>🍓 Memory Match – 5 ด่าน</title>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
         * {
@@ -15,65 +15,183 @@
 
         body {
             font-family: 'Kanit', sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 40%, #0f3460 100%);
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
             min-height: 100vh;
+            overflow-x: hidden;
+            padding: 16px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            padding: 20px;
+            justify-content: flex-start;
         }
 
-        /* ─── Header ─── */
-        .header {
-            text-align: center;
-            margin-bottom: 24px;
+        /* ═══ SCREENS ═══ */
+        .screen {
+            display: none;
+            width: 100%;
+            max-width: 620px;
+            flex-direction: column;
+            align-items: center;
         }
 
-        .header h1 {
-            font-size: clamp(1.8rem, 5vw, 2.8rem);
+        .screen.active {
+            display: flex;
+        }
+
+        /* ═══ LEVEL SELECT ═══ */
+        #screen-select {
+            padding-top: 30px;
+            gap: 20px;
+        }
+
+        .select-title {
+            font-size: clamp(2rem, 6vw, 3rem);
             font-weight: 800;
             background: linear-gradient(135deg, #f093fb, #f5a623, #43e97b);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            text-shadow: none;
-            letter-spacing: -0.5px;
+            text-align: center;
+            line-height: 1.2;
         }
 
-        .header p {
-            color: rgba(255, 255, 255, 0.5);
-            font-size: 0.9rem;
+        .select-subtitle {
+            color: rgba(255, 255, 255, .45);
+            font-size: .95rem;
+            text-align: center;
             margin-top: 4px;
         }
 
-        /* ─── Stats Bar ─── */
+        .levels-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 14px;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .level-card {
+            background: rgba(255, 255, 255, .07);
+            border: 1px solid rgba(255, 255, 255, .12);
+            border-radius: 20px;
+            padding: 22px 14px;
+            text-align: center;
+            cursor: pointer;
+            transition: all .25s;
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .level-card:hover {
+            transform: translateY(-4px);
+            background: rgba(255, 255, 255, .13);
+            box-shadow: 0 12px 36px rgba(0, 0, 0, .4);
+        }
+
+        .level-card .lv-badge {
+            position: absolute;
+            top: 10px;
+            right: 12px;
+            font-size: .65rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: rgba(255, 255, 255, .3);
+            text-transform: uppercase;
+        }
+
+        .level-card .lv-icon {
+            font-size: 2.2rem;
+            margin-bottom: 6px;
+        }
+
+        .level-card .lv-name {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 2px;
+        }
+
+        .level-card .lv-info {
+            font-size: .75rem;
+            color: rgba(255, 255, 255, .4);
+        }
+
+        .level-card .lv-stars {
+            font-size: .85rem;
+            margin-top: 6px;
+            color: #fbd38d;
+            letter-spacing: 2px;
+        }
+
+        .level-card.locked {
+            opacity: .4;
+            cursor: not-allowed;
+        }
+
+        .level-card.locked:hover {
+            transform: none;
+        }
+
+        .level-card.completed {
+            border-color: rgba(72, 187, 120, .5);
+        }
+
+        .level-card.completed .lv-stars {
+            color: #48bb78;
+        }
+
+        /* ═══ GAME SCREEN ═══ */
+        #screen-game {
+            padding-top: 16px;
+            gap: 14px;
+        }
+
+        .game-header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .level-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 255, 255, .08);
+            border: 1px solid rgba(255, 255, 255, .12);
+            border-radius: 50px;
+            padding: 6px 14px;
+            color: #fff;
+            font-weight: 700;
+            font-size: .9rem;
+        }
+
         .stats {
             display: flex;
-            gap: 16px;
-            margin-bottom: 20px;
-            justify-content: center;
+            gap: 10px;
         }
 
         .stat-box {
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, .08);
+            border: 1px solid rgba(255, 255, 255, .1);
             border-radius: 12px;
-            padding: 8px 20px;
+            padding: 6px 14px;
             text-align: center;
             backdrop-filter: blur(10px);
         }
 
-        .stat-box .label {
-            color: rgba(255, 255, 255, 0.4);
-            font-size: 0.7rem;
+        .stat-box .lbl {
+            color: rgba(255, 255, 255, .35);
+            font-size: .65rem;
+            letter-spacing: .8px;
             text-transform: uppercase;
-            letter-spacing: 1px;
         }
 
-        .stat-box .value {
+        .stat-box .val {
             color: #fff;
-            font-size: 1.3rem;
+            font-size: 1.1rem;
             font-weight: 700;
         }
 
@@ -89,16 +207,24 @@
             color: #f093fb;
         }
 
-        /* ─── Grid ─── */
+        /* ═══ GRID ═══ */
         .grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 14px;
-            max-width: 520px;
+            gap: 10px;
             width: 100%;
         }
 
-        /* ─── Card ─── */
+        .grid.g4 {
+            grid-template-columns: repeat(4, 1fr);
+            max-width: 480px;
+        }
+
+        .grid.g5 {
+            grid-template-columns: repeat(5, 1fr);
+            max-width: 560px;
+        }
+
+        /* ═══ CARD ═══ */
         .card {
             aspect-ratio: 1;
             cursor: pointer;
@@ -111,8 +237,8 @@
             height: 100%;
             position: relative;
             transform-style: preserve-3d;
-            transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
-            border-radius: 16px;
+            transition: transform .42s cubic-bezier(.4, 0, .2, 1);
+            border-radius: 14px;
         }
 
         .card.flipped .card-inner,
@@ -120,286 +246,106 @@
             transform: rotateY(180deg);
         }
 
-        .card-front,
-        .card-back {
+        .card-back,
+        .card-front {
             position: absolute;
             inset: 0;
-            border-radius: 16px;
+            border-radius: 14px;
             backface-visibility: hidden;
-            -webkit-backface-visibility: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
-        /* BACK (question mark side) */
         .card-back {
             background: linear-gradient(135deg, #2d3748, #4a5568);
-            border: 2px solid rgba(255, 255, 255, 0.12);
-            font-size: 2rem;
-            color: rgba(255, 255, 255, 0.3);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-            transition: background 0.2s, transform 0.1s;
+            border: 2px solid rgba(255, 255, 255, .1);
+            font-size: 1.4rem;
+            color: rgba(255, 255, 255, .25);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, .4);
+            transition: background .2s;
         }
 
         .card:hover:not(.flipped):not(.matched) .card-back {
             background: linear-gradient(135deg, #3d4f69, #5a6a8a);
-            transform: translateY(-2px);
         }
 
-        .card:hover:not(.flipped):not(.matched) .card-inner {
-            filter: brightness(1.1);
-        }
-
-        /* FRONT (fruit side) */
         .card-front {
-            background: linear-gradient(135deg, #ffffff, #f0f4ff);
+            background: linear-gradient(135deg, #fff, #f0f4ff);
             transform: rotateY(180deg);
-            font-size: clamp(2rem, 6vw, 3rem);
-            border: 2px solid rgba(255, 255, 255, 0.8);
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+            border: 2px solid rgba(255, 255, 255, .8);
+            box-shadow: 0 6px 24px rgba(0, 0, 0, .25);
+            font-size: clamp(1.5rem, 4vw, 2.2rem);
         }
 
-        /* Matched glow */
         .card.matched .card-front {
             background: linear-gradient(135deg, #c6f6d5, #9ae6b4);
             border-color: #48bb78;
-            box-shadow: 0 0 20px rgba(72, 187, 120, 0.6), 0 8px 30px rgba(0, 0, 0, 0.2);
-            animation: matchPop 0.4s ease;
+            box-shadow: 0 0 18px rgba(72, 187, 120, .5);
+            animation: matchPop .4s ease;
         }
 
         @keyframes matchPop {
             0% {
-                transform: rotateY(180deg) scale(1);
+                transform: rotateY(180deg) scale(1)
             }
 
             50% {
-                transform: rotateY(180deg) scale(1.15);
+                transform: rotateY(180deg) scale(1.15)
             }
 
             100% {
-                transform: rotateY(180deg) scale(1);
+                transform: rotateY(180deg) scale(1)
             }
         }
 
-        /* Wrong shake */
         .card.wrong .card-inner {
-            animation: shake 0.4s ease;
+            animation: shake .4s ease;
         }
 
         @keyframes shake {
 
             0%,
             100% {
-                transform: rotateY(180deg) translateX(0);
+                transform: rotateY(180deg) translateX(0)
             }
 
             20% {
-                transform: rotateY(180deg) translateX(-6px);
+                transform: rotateY(180deg) translateX(-6px)
             }
 
             40% {
-                transform: rotateY(180deg) translateX(6px);
+                transform: rotateY(180deg) translateX(6px)
             }
 
             60% {
-                transform: rotateY(180deg) translateX(-6px);
+                transform: rotateY(180deg) translateX(-5px)
             }
 
             80% {
-                transform: rotateY(180deg) translateX(4px);
+                transform: rotateY(180deg) translateX(4px)
             }
         }
 
-        /* ─── Restart Button ─── */
-        .btn-restart {
-            margin-top: 20px;
-            padding: 10px 28px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: rgba(255, 255, 255, 0.7);
-            border-radius: 50px;
-            cursor: pointer;
-            font-family: 'Kanit', sans-serif;
-            font-size: 0.9rem;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-            transition: all 0.2s;
-        }
-
-        .btn-restart:hover {
-            background: rgba(255, 255, 255, 0.18);
-            color: #fff;
-            transform: translateY(-1px);
-        }
-
-        /* ─── Win Overlay ─── */
-        #win-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(8px);
-            z-index: 100;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-        }
-
-        #win-overlay.show {
-            display: flex;
-        }
-
-        .win-card {
-            background: linear-gradient(135deg, #1a1a2e, #16213e);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 28px;
-            padding: 40px 50px;
-            text-align: center;
-            max-width: 380px;
-            width: 90%;
-            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
-            animation: slideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-
-        @keyframes slideUp {
-            from {
-                transform: translateY(60px) scale(0.8);
-                opacity: 0;
-            }
-
-            to {
-                transform: translateY(0) scale(1);
-                opacity: 1;
-            }
-        }
-
-        .win-emoji {
-            font-size: 3.5rem;
-            margin-bottom: 8px;
-        }
-
-        .win-title {
-            font-size: 2rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, #f5a623, #f093fb, #43e97b);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 6px;
-        }
-
-        .win-subtitle {
-            color: rgba(255, 255, 255, 0.5);
-            font-size: 0.95rem;
-            margin-bottom: 24px;
-        }
-
-        /* Stars */
-        .stars {
-            display: flex;
-            justify-content: center;
-            gap: 8px;
-            margin-bottom: 20px;
-        }
-
-        .star {
-            font-size: 3rem;
-            opacity: 0;
-            transform: scale(0) rotate(-30deg);
-            animation: starPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-        }
-
-        .star:nth-child(1) {
-            animation-delay: 0.2s;
-        }
-
-        .star:nth-child(2) {
-            animation-delay: 0.4s;
-        }
-
-        .star:nth-child(3) {
-            animation-delay: 0.6s;
-        }
-
-        @keyframes starPop {
-            to {
-                opacity: 1;
-                transform: scale(1) rotate(0deg);
-            }
-        }
-
-        .win-stats {
-            display: flex;
-            gap: 16px;
-            justify-content: center;
-            margin-bottom: 28px;
-        }
-
-        .win-stat {
-            text-align: center;
-        }
-
-        .win-stat .wlabel {
-            color: rgba(255, 255, 255, 0.4);
-            font-size: 0.7rem;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-
-        .win-stat .wvalue {
-            color: #fff;
-            font-size: 1.4rem;
-            font-weight: 700;
-        }
-
-        .btn-play-again {
-            padding: 14px 36px;
-            background: linear-gradient(135deg, #f093fb, #f5a623);
-            border: none;
-            border-radius: 50px;
-            color: #fff;
-            font-family: 'Kanit', sans-serif;
-            font-size: 1rem;
-            font-weight: 700;
-            cursor: pointer;
-            letter-spacing: 0.5px;
-            box-shadow: 0 8px 24px rgba(240, 147, 251, 0.4);
-            transition: all 0.2s;
-        }
-
-        .btn-play-again:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 32px rgba(240, 147, 251, 0.5);
-        }
-
-        /* ─── Fireworks Canvas ─── */
-        #fireworks {
-            position: fixed;
-            inset: 0;
-            pointer-events: none;
-            z-index: 99;
-        }
-
-        /* ─── Countdown Badge ─── */
         .countdown-badge {
             position: absolute;
-            top: -6px;
-            right: -6px;
+            top: -5px;
+            right: -5px;
+            z-index: 10;
             background: #e53e3e;
             color: #fff;
             border-radius: 50%;
-            width: 22px;
-            height: 22px;
+            width: 20px;
+            height: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.7rem;
+            font-size: .65rem;
             font-weight: 700;
-            z-index: 10;
-            animation: countPulse 1s infinite;
+            animation: cPulse 1s infinite;
         }
 
-        @keyframes countPulse {
+        @keyframes cPulse {
 
             0%,
             100% {
@@ -411,14 +357,200 @@
             }
         }
 
-        @media (max-width: 420px) {
-            .grid {
-                gap: 10px;
-                max-width: 360px;
+        .btn-back {
+            background: rgba(255, 255, 255, .07);
+            border: 1px solid rgba(255, 255, 255, .12);
+            color: rgba(255, 255, 255, .6);
+            border-radius: 50px;
+            padding: 8px 18px;
+            font-family: 'Kanit', sans-serif;
+            font-size: .85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .2s;
+        }
+
+        .btn-back:hover {
+            background: rgba(255, 255, 255, .14);
+            color: #fff;
+        }
+
+        /* ═══ WIN OVERLAY ═══ */
+        #win-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .85);
+            backdrop-filter: blur(8px);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #win-overlay.show {
+            display: flex;
+        }
+
+        .win-card {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border: 1px solid rgba(255, 255, 255, .15);
+            border-radius: 28px;
+            padding: 36px 44px;
+            text-align: center;
+            max-width: 380px;
+            width: 92%;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, .6);
+            animation: slideUp .5s cubic-bezier(.34, 1.56, .64, 1);
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(60px) scale(.8);
+                opacity: 0
             }
 
-            .card-front {
-                font-size: 1.8rem;
+            to {
+                transform: none;
+                opacity: 1
+            }
+        }
+
+        .win-emoji {
+            font-size: 3rem;
+            margin-bottom: 6px;
+        }
+
+        .win-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 4px;
+            background: linear-gradient(135deg, #f5a623, #f093fb, #43e97b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .win-sub {
+            color: rgba(255, 255, 255, .45);
+            font-size: .9rem;
+            margin-bottom: 20px;
+        }
+
+        .stars {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 18px;
+        }
+
+        .star {
+            font-size: 2.6rem;
+            opacity: 0;
+            transform: scale(0) rotate(-30deg);
+            animation: starPop .5s cubic-bezier(.34, 1.56, .64, 1) forwards;
+        }
+
+        .star:nth-child(1) {
+            animation-delay: .2s
+        }
+
+        .star:nth-child(2) {
+            animation-delay: .4s
+        }
+
+        .star:nth-child(3) {
+            animation-delay: .6s
+        }
+
+        @keyframes starPop {
+            to {
+                opacity: 1;
+                transform: scale(1) rotate(0)
+            }
+        }
+
+        .win-stats {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            margin-bottom: 22px;
+        }
+
+        .win-stat .wlbl {
+            color: rgba(255, 255, 255, .35);
+            font-size: .65rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .win-stat .wval {
+            color: #fff;
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .score-badge {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin: 10px 0;
+            background: linear-gradient(135deg, #f5a623, #fa709a);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .btn-next,
+        .btn-replay {
+            display: inline-block;
+            padding: 12px 32px;
+            border: none;
+            border-radius: 50px;
+            font-family: 'Kanit', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all .2s;
+            margin: 4px;
+        }
+
+        .btn-next {
+            background: linear-gradient(135deg, #43e97b, #38f9d7);
+            color: #0f3460;
+            box-shadow: 0 8px 20px rgba(67, 233, 123, .35);
+        }
+
+        .btn-next:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 28px rgba(67, 233, 123, .45);
+        }
+
+        .btn-replay {
+            background: linear-gradient(135deg, #f093fb, #f5a623);
+            color: #fff;
+            box-shadow: 0 8px 20px rgba(240, 147, 251, .35);
+        }
+
+        .btn-replay:hover {
+            transform: translateY(-2px);
+        }
+
+        canvas#fw {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 199;
+        }
+
+        @media(max-width:440px) {
+            .grid.g4 {
+                max-width: 340px;
+            }
+
+            .grid.g5 {
+                max-width: 420px;
+                grid-template-columns: repeat(4, 1fr);
+            }
+
+            .win-card {
+                padding: 28px 24px;
             }
         }
     </style>
@@ -426,129 +558,171 @@
 
 <body>
 
-    <canvas id="fireworks"></canvas>
+    <canvas id="fw"></canvas>
 
-    <div class="header">
-        <h1>🍓 เกมจับคู่ผลไม้</h1>
-        <p>เปิดภาพคู่ที่เหมือนกันให้ครบทั้ง 6 คู่แล้วชนะ!</p>
+    <!-- ═══ LEVEL SELECT SCREEN ═══ -->
+    <div class="screen active" id="screen-select">
+        <div class="select-title">🎮 Memory Match</div>
+        <div class="select-subtitle">เลือกด่านที่ต้องการเล่น!</div>
+        <div class="levels-grid" id="levels-grid"></div>
     </div>
 
-    <div class="stats">
-        <div class="stat-box">
-            <div class="label">⏱ เวลา</div>
-            <div class="value" id="timer-val">0:00</div>
+    <!-- ═══ GAME SCREEN ═══ -->
+    <div class="screen" id="screen-game">
+        <div class="game-header" style="max-width:620px; width:100%;">
+            <div style="display:flex; gap:10px; align-items:center;">
+                <button class="btn-back" onclick="goSelect()">← เมนู</button>
+                <div class="level-badge" id="level-badge">ด่าน 1</div>
+            </div>
+            <div class="stats">
+                <div class="stat-box">
+                    <div class="lbl">⏱</div>
+                    <div class="val" id="timer-val">0:00</div>
+                </div>
+                <div class="stat-box">
+                    <div class="lbl">คู่</div>
+                    <div class="val" id="pairs-val">0/?</div>
+                </div>
+                <div class="stat-box">
+                    <div class="lbl">ครั้ง</div>
+                    <div class="val" id="moves-val">0</div>
+                </div>
+            </div>
         </div>
-        <div class="stat-box">
-            <div class="label">✅ คู่</div>
-            <div class="value" id="pairs-val">0/6</div>
-        </div>
-        <div class="stat-box">
-            <div class="label">🖱️ ครั้ง</div>
-            <div class="value" id="moves-val">0</div>
-        </div>
+        <div class="grid g4" id="grid"></div>
     </div>
 
-    <div class="grid" id="grid"></div>
-
-    <button class="btn-restart" onclick="startGame()">🔄 เล่นใหม่</button>
-
-    <!-- Win Overlay -->
+    <!-- ═══ WIN OVERLAY ═══ -->
     <div id="win-overlay">
         <div class="win-card">
-            <div class="win-emoji">🏆</div>
-            <div class="win-title">ยอดเยี่ยม!</div>
-            <div class="win-subtitle">คุณจับคู่ผลไม้ครบทั้ง 6 คู่แล้ว!</div>
-            <div class="stars">
-                <span class="star">⭐</span>
-                <span class="star">⭐</span>
-                <span class="star">⭐</span>
+            <div class="win-emoji" id="win-emoji">🏆</div>
+            <div class="win-title" id="win-title">ยอดเยี่ยม!</div>
+            <div class="win-sub" id="win-sub">ผ่านด่านแล้ว!</div>
+            <div class="stars"><span class="star">⭐</span><span class="star">⭐</span><span class="star">⭐</span></div>
+            <div id="perfect-score" style="display:none;">
+                <div class="score-badge">🎊 100 คะแนน!</div>
+                <div style="color:rgba(255,255,255,.5); font-size:.85rem; margin-bottom:12px;">ผ่านครบทั้ง 5 ด่านแล้ว!
+                </div>
             </div>
             <div class="win-stats">
                 <div class="win-stat">
-                    <div class="wlabel">เวลา</div>
-                    <div class="wvalue" id="win-time">-</div>
+                    <div class="wlbl">เวลา</div>
+                    <div class="wval" id="win-time">-</div>
                 </div>
                 <div class="win-stat">
-                    <div class="wlabel">จำนวนครั้ง</div>
-                    <div class="wvalue" id="win-moves">-</div>
+                    <div class="wlbl">จำนวนครั้ง</div>
+                    <div class="wval" id="win-moves">-</div>
                 </div>
             </div>
-            <button class="btn-play-again" onclick="startGame()">🎮 เล่นอีกครั้ง</button>
+            <div id="win-btns"></div>
         </div>
     </div>
 
     <script>
-        const FRUITS = ['🍓', '🍇', '🍊', '🍎', '🍌', '🥥'];
-        const FLIP_BACK_DELAY = 3000; // 3 วินาที ถ้าผิด
-
-        let cards = [];
-        let flipped = [];
-        let matched = 0;
-        let moves = 0;
-        let canFlip = true;
-        let timerInterval = null;
-        let seconds = 0;
-
-        // ─── Fisher-Yates Shuffle ───
-        function shuffle(arr) {
-            const a = [...arr];
-            for (let i = a.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [a[i], a[j]] = [a[j], a[i]];
+        // ═══════════════════ LEVEL CONFIG ═══════════════════
+        const LEVELS = [
+            {
+                id: 1, name: 'ผลไม้สด', icon: '🍓', cards: 12, cols: 4,
+                desc: '6 คู่ • ผลไม้',
+                items: ['🍓', '🍇', '🍊', '🍎', '🍌', '🥥']
+            },
+            {
+                id: 2, name: 'ผลไม้หวาน', icon: '🍒', cards: 12, cols: 4,
+                desc: '6 คู่ • ผลไม้',
+                items: ['🍒', '🍍', '🍉', '🥭', '🍐', '🥝']
+            },
+            {
+                id: 3, name: 'โลกสัตว์', icon: '🐯', cards: 16, cols: 4,
+                desc: '8 คู่ • สัตว์',
+                items: ['🐄', '🐯', '🐊', '🐕', '🐱', '🦜', '🦭', '🦐']
+            },
+            {
+                id: 4, name: 'มิกซ์สุดมัน', icon: '🦁', cards: 20, cols: 5,
+                desc: '10 คู่ • ผลไม้+สัตว์',
+                items: ['🍓', '🍊', '🥥', '🥭', '🍎', '🐱', '🦁', '🐬', '🐃', '🦀']
+            },
+            {
+                id: 5, name: 'ผักสดใส', icon: '🥕', cards: 16, cols: 4,
+                desc: '8 คู่ • ผัก',
+                items: ['🥒', '🥬', '🥕', '🥦', '🌿', '🍅', '🍆', '🍃']
             }
-            return a;
+        ];
+
+        // ═══════════════════ STATE ═══════════════════
+        const FLIP_BACK = 1000; // 1 วินาที
+        let completedLevels = new Set(JSON.parse(localStorage.getItem('ml_completed') || '[]'));
+        let currentLevel = null;
+        let flipped = [], matched = 0, moves = 0, totalPairs = 0;
+        let canFlip = true, timerInt = null, seconds = 0;
+        let particles = [], fwInt = null;
+
+        // ═══════════════════ LEVEL SELECT ═══════════════════
+        function renderSelect() {
+            showScreen('screen-select');
+            const grid = document.getElementById('levels-grid');
+            grid.innerHTML = '';
+            LEVELS.forEach((lv, i) => {
+                const done = completedLevels.has(lv.id);
+                const locked = i > 0 && !completedLevels.has(LEVELS[i - 1].id);
+                const div = document.createElement('div');
+                div.className = 'level-card' + (done ? ' completed' : '') + (locked ? ' locked' : '');
+                div.innerHTML = `
+            <div class="lv-badge">LV ${lv.id}</div>
+            <div class="lv-icon">${lv.icon}</div>
+            <div class="lv-name">${lv.name}</div>
+            <div class="lv-info">${lv.desc}</div>
+            <div class="lv-stars">${done ? '★★★' : (locked ? '🔒' : '☆☆☆')}</div>`;
+                if (!locked) div.onclick = () => startLevel(lv);
+                grid.appendChild(div);
+            });
         }
 
-        // ─── Start / Restart ───
-        function startGame() {
-            // Reset state
-            cards = [];
-            flipped = [];
-            matched = 0;
-            moves = 0;
-            canFlip = true;
-            seconds = 0;
-            stopTimer();
+        function goSelect() {
+            stopTimer(); renderSelect();
+        }
 
-            // Reset UI
+        // ═══════════════════ START LEVEL ═══════════════════
+        function startLevel(lv) {
+            currentLevel = lv;
+            flipped = []; matched = 0; moves = 0; canFlip = true; seconds = 0;
+            totalPairs = lv.items.length;
+            stopTimer();
             document.getElementById('win-overlay').classList.remove('show');
-            document.getElementById('pairs-val').textContent = '0/6';
+
+            document.getElementById('level-badge').textContent = `ด่าน ${lv.id} – ${lv.name}`;
+            document.getElementById('pairs-val').textContent = `0/${totalPairs}`;
             document.getElementById('moves-val').textContent = '0';
             document.getElementById('timer-val').textContent = '0:00';
 
-            // Build deck: 6 pairs → 12 cards
-            const deck = shuffle([...FRUITS, ...FRUITS]);
+            // Grid columns
             const grid = document.getElementById('grid');
-            grid.innerHTML = '';
+            grid.className = 'grid ' + (lv.cols === 5 ? 'g5' : 'g4');
 
-            deck.forEach((fruit, idx) => {
+            // Build deck
+            const deck = shuffle([...lv.items, ...lv.items]);
+            grid.innerHTML = '';
+            deck.forEach((emoji, idx) => {
                 const card = document.createElement('div');
                 card.className = 'card';
-                card.dataset.fruit = fruit;
+                card.dataset.emoji = emoji;
                 card.dataset.idx = idx;
-                card.innerHTML = `
-                    <div class="card-inner">
-                        <div class="card-back">?</div>
-                        <div class="card-front">${fruit}</div>
-                    </div>`;
-                card.addEventListener('click', () => onCardClick(card));
+                card.innerHTML = `<div class="card-inner">
+            <div class="card-back">?</div>
+            <div class="card-front">${emoji}</div>
+        </div>`;
+                card.addEventListener('click', () => onFlip(card));
                 grid.appendChild(card);
-                cards.push(card);
             });
 
+            showScreen('screen-game');
             startTimer();
         }
 
-        // ─── Card Click ───
-        function onCardClick(card) {
-            if (!canFlip) return;
-            if (card.classList.contains('flipped')) return;
-            if (card.classList.contains('matched')) return;
-            if (flipped.length >= 2) return;
-
+        // ═══════════════════ FLIP LOGIC ═══════════════════
+        function onFlip(card) {
+            if (!canFlip || card.classList.contains('flipped') || card.classList.contains('matched') || flipped.length >= 2) return;
             card.classList.add('flipped');
             flipped.push(card);
-
             if (flipped.length === 2) {
                 moves++;
                 document.getElementById('moves-val').textContent = moves;
@@ -557,161 +731,140 @@
             }
         }
 
-        // ─── Check Match ───
         function checkMatch() {
             const [a, b] = flipped;
-            if (a.dataset.fruit === b.dataset.fruit) {
-                // ✅ Match!
+            if (a.dataset.emoji === b.dataset.emoji) {
                 setTimeout(() => {
-                    a.classList.add('matched');
-                    b.classList.add('matched');
+                    a.classList.add('matched'); b.classList.add('matched');
                     matched++;
-                    document.getElementById('pairs-val').textContent = `${matched}/6`;
-                    flipped = [];
-                    canFlip = true;
-                    if (matched === 6) onWin();
-                }, 400);
+                    document.getElementById('pairs-val').textContent = `${matched}/${totalPairs}`;
+                    flipped = []; canFlip = true;
+                    if (matched === totalPairs) onWin();
+                }, 350);
             } else {
-                // ❌ No match — show countdown then flip back
-                let countdown = Math.ceil(FLIP_BACK_DELAY / 1000);
-                a.classList.add('wrong');
-                b.classList.add('wrong');
-
-                // Add countdown badge to both cards
-                addBadge(a, countdown);
-                addBadge(b, countdown);
-
-                const tick = setInterval(() => {
-                    countdown--;
-                    updateBadge(a, countdown);
-                    updateBadge(b, countdown);
-                    if (countdown <= 0) clearInterval(tick);
-                }, 1000);
-
+                a.classList.add('wrong'); b.classList.add('wrong');
+                setBadge(a, 1); setBadge(b, 1);
                 setTimeout(() => {
-                    clearInterval(tick);
-                    removeBadge(a);
-                    removeBadge(b);
+                    removeBadge(a); removeBadge(b);
                     a.classList.remove('flipped', 'wrong');
                     b.classList.remove('flipped', 'wrong');
-                    flipped = [];
-                    canFlip = true;
-                }, FLIP_BACK_DELAY);
+                    flipped = []; canFlip = true;
+                }, FLIP_BACK);
             }
         }
 
-        function addBadge(card, n) {
+        function setBadge(card, n) {
             removeBadge(card);
-            const badge = document.createElement('div');
-            badge.className = 'countdown-badge';
-            badge.id = `badge-${card.dataset.idx}`;
-            badge.textContent = n;
-            card.style.position = 'relative';
-            card.appendChild(badge);
-        }
-        function updateBadge(card, n) {
-            const b = card.querySelector('.countdown-badge');
-            if (b) b.textContent = n;
+            const b = document.createElement('div');
+            b.className = 'countdown-badge'; b.textContent = n;
+            card.style.position = 'relative'; card.appendChild(b);
         }
         function removeBadge(card) {
             const b = card.querySelector('.countdown-badge');
             if (b) b.remove();
         }
 
-        // ─── Timer ───
-        function startTimer() {
-            timerInterval = setInterval(() => {
-                seconds++;
-                const m = Math.floor(seconds / 60);
-                const s = String(seconds % 60).padStart(2, '0');
-                document.getElementById('timer-val').textContent = `${m}:${s}`;
-            }, 1000);
-        }
-        function stopTimer() {
-            clearInterval(timerInterval);
-            timerInterval = null;
-        }
-
-        // ─── Win ───
+        // ═══════════════════ WIN ═══════════════════
         function onWin() {
             stopTimer();
-            const m = Math.floor(seconds / 60);
-            const s = String(seconds % 60).padStart(2, '0');
+            const m = Math.floor(seconds / 60), s = String(seconds % 60).padStart(2, '0');
+            completedLevels.add(currentLevel.id);
+            localStorage.setItem('ml_completed', JSON.stringify([...completedLevels]));
+
+            const allDone = LEVELS.every(lv => completedLevels.has(lv.id));
+            const nextLv = LEVELS.find(lv => lv.id === currentLevel.id + 1);
+
             document.getElementById('win-time').textContent = `${m}:${s}`;
             document.getElementById('win-moves').textContent = `${moves} ครั้ง`;
+            document.getElementById('win-title').textContent = allDone ? '🎊 จบแล้ว! 🎊' : (currentLevel.id < 5 ? `ผ่านด่าน ${currentLevel.id}!` : 'ยอดเยี่ยม!');
+            document.getElementById('win-sub').textContent = allDone ? 'คุณผ่านครบทุกด่านแล้ว!' : `ผ่านด่าน ${currentLevel.id} – ${currentLevel.name}`;
+            document.getElementById('win-emoji').textContent = allDone ? '🥇' : (currentLevel.id < 5 ? '🏅' : '🏆');
+            document.getElementById('perfect-score').style.display = allDone ? 'block' : 'none';
+
+            // Buttons
+            const btnDiv = document.getElementById('win-btns');
+            btnDiv.innerHTML = '';
+            if (nextLv) {
+                const nb = document.createElement('button');
+                nb.className = 'btn-next';
+                nb.textContent = `▶ ด่านที่ ${nextLv.id}`;
+                nb.onclick = () => { hideWin(); startLevel(nextLv); };
+                btnDiv.appendChild(nb);
+            }
+            const rb = document.createElement('button');
+            rb.className = 'btn-replay';
+            rb.textContent = allDone ? '🔄 เล่นใหม่ทั้งหมด' : '🔄 ด่านนี้อีกครั้ง';
+            rb.onclick = () => {
+                if (allDone) { completedLevels.clear(); localStorage.removeItem('ml_completed'); hideWin(); renderSelect(); }
+                else { hideWin(); startLevel(currentLevel); }
+            };
+            btnDiv.appendChild(rb);
 
             setTimeout(() => {
                 document.getElementById('win-overlay').classList.add('show');
-                launchFireworks();
-            }, 600);
+                launchFireworks(allDone ? 20 : 10);
+            }, 500);
         }
 
-        // ─── Fireworks ───
-        const canvas = document.getElementById('fireworks');
-        const ctx = canvas.getContext('2d');
-        let particles = [];
-        let fwInterval = null;
+        function hideWin() { document.getElementById('win-overlay').classList.remove('show'); }
 
-        function resize() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
+        // ═══════════════════ TIMER ═══════════════════
+        function startTimer() {
+            timerInt = setInterval(() => {
+                seconds++;
+                document.getElementById('timer-val').textContent = `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
+            }, 1000);
         }
-        resize();
-        window.addEventListener('resize', resize);
+        function stopTimer() { clearInterval(timerInt); timerInt = null; }
 
-        function randomColor() {
-            const colors = ['#f093fb', '#f5a623', '#43e97b', '#4facfe', '#fa709a', '#fee140', '#a18cd1', '#fbc2eb'];
-            return colors[Math.floor(Math.random() * colors.length)];
+        // ═══════════════════ HELPERS ═══════════════════
+        function shuffle(arr) {
+            const a = [...arr];
+            for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1));[a[i], a[j]] = [a[j], a[i]]; }
+            return a;
+        }
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
         }
 
-        function createBurst(x, y) {
-            const count = 60;
+        // ═══════════════════ FIREWORKS ═══════════════════
+        const fwCanvas = document.getElementById('fw');
+        const fwCtx = fwCanvas.getContext('2d');
+        function resizeFW() { fwCanvas.width = window.innerWidth; fwCanvas.height = window.innerHeight; }
+        resizeFW(); window.addEventListener('resize', resizeFW);
+
+        function rndColor() { const c = ['#f093fb', '#f5a623', '#43e97b', '#4facfe', '#fa709a', '#fee140', '#a18cd1', '#fbc2eb', '#43c6ac', '#f96854']; return c[Math.floor(Math.random() * c.length)]; }
+        function burst(x, y, count = 50) {
             for (let i = 0; i < count; i++) {
-                const angle = (Math.PI * 2 / count) * i;
-                const speed = 2 + Math.random() * 5;
-                particles.push({
-                    x, y,
-                    vx: Math.cos(angle) * speed,
-                    vy: Math.sin(angle) * speed,
-                    alpha: 1,
-                    color: randomColor(),
-                    size: 2 + Math.random() * 3,
-                    gravity: 0.08
-                });
+                const angle = (Math.PI * 2 / count) * i, speed = 2 + Math.random() * 5;
+                particles.push({ x, y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, alpha: 1, color: rndColor(), size: 2 + Math.random() * 3, g: .09 });
             }
         }
-
-        function animateFireworks() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        function animFW() {
+            fwCtx.clearRect(0, 0, fwCanvas.width, fwCanvas.height);
             particles.forEach(p => {
-                p.x += p.vx;
-                p.y += p.vy;
-                p.vy += p.gravity;
-                p.alpha -= 0.015;
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                ctx.fillStyle = p.color + Math.floor(p.alpha * 255).toString(16).padStart(2, '0');
-                ctx.fill();
+                p.x += p.vx; p.y += p.vy; p.vy += p.g; p.alpha -= .016;
+                fwCtx.beginPath(); fwCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                fwCtx.fillStyle = p.color + Math.floor(p.alpha * 255).toString(16).padStart(2, '0'); fwCtx.fill();
             });
             particles = particles.filter(p => p.alpha > 0);
-            if (particles.length > 0 || fwInterval) requestAnimationFrame(animateFireworks);
+            if (particles.length > 0 || fwInt) requestAnimationFrame(animFW);
         }
-
-        function launchFireworks() {
+        function launchFireworks(bursts = 10) {
             particles = [];
-            let count = 0;
-            fwInterval = setInterval(() => {
-                const x = 100 + Math.random() * (window.innerWidth - 200);
-                const y = 80 + Math.random() * (window.innerHeight * 0.6);
-                createBurst(x, y);
-                count++;
-                if (count >= 12) { clearInterval(fwInterval); fwInterval = null; }
-            }, 250);
-            requestAnimationFrame(animateFireworks);
+            let n = 0;
+            fwInt = setInterval(() => {
+                const x = 80 + Math.random() * (window.innerWidth - 160);
+                const y = 60 + Math.random() * (window.innerHeight * .55);
+                burst(x, y, 60); n++;
+                if (n >= bursts) { clearInterval(fwInt); fwInt = null; }
+            }, 300);
+            requestAnimationFrame(animFW);
         }
 
-        // ─── Start ───
-        startGame();
+        // ═══════════════════ INIT ═══════════════════
+        renderSelect();
     </script>
 </body>
 
