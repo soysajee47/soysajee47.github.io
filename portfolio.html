@@ -613,7 +613,7 @@
         <ul>
             <li><a href="#home" class="nav-link">หน้าแรก</a></li>
             <li><a href="#about" class="nav-link">เกี่ยวกับฉัน</a></li>
-            <li><a href="#projects" class="nav-link">ผลงานที่โดดเด่น</a></li>
+            <li><a href="#projects" class="nav-link">ผลงานที่ประทับใจ</a></li>
             <li><a href="full-portfolio.html" class="nav-link">Portfolio ฉบับเต็ม</a></li>
         </ul>
     </nav>
@@ -625,10 +625,17 @@
             <p>นักศึกษา มหาวิทยาลัยราชภัฏพิบูลสงคราม คณะวิศวกรรมศาสตร์และเทคโนโลยีอุตสาหกรรม
                 สาขา วิศวกรรมคอมพิวเตอร์ ปี4 ที่มีความมุ่งมั่นและสนใจในสายงานพัฒนาปัญญาประดิษฐ์ (AI Developer)
                 พัฒนาเว็บไซต์และนักออกแบบ UI ที่รังสรรค์ประสบการณ์ดิจิทัล</p>
-            <a href="#projects" class="btn">
-                <span>ชมผลงานทั้งหมด</span>
-                <span style="font-size: 1.2rem">✨</span>
-            </a>
+            <div style="display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap;">
+                <a href="#about" class="btn"
+                    style="background: linear-gradient(135deg, var(--primary), var(--secondary)); border-color: transparent;">
+                    <span>ประวัติส่วนตัว</span>
+                    <span style="font-size: 1.2rem">👤</span>
+                </a>
+                <a href="#projects" class="btn">
+                    <span>ชมผลงานทั้งหมด</span>
+                    <span style="font-size: 1.2rem">✨</span>
+                </a>
+            </div>
         </div>
     </section>
 
@@ -659,34 +666,41 @@
     </section>
 
     <section id="projects">
-        <h2 class="section-title">ผลงานที่โดดเด่น</h2>
+        <h2 class="section-title">ผลงานที่ประทับใจ</h2>
         <div class="projects-grid">
 
-            <!-- Featured Showcase (Map) -->
-            <div class="project-card featured">
-                <div class="featured-content">
-                    <span class="project-icon">📍</span>
-                    <h3>Live GPS Northern Journey</h3>
-                    <p>แผนที่การเดินทางเชิงโต้ตอบแบบ Real-time สุดล้ำ แสดงพิกัด GPS ตลอดเส้นทางจากเชียงใหม่มายังพิษณุโลก
-                        พร้อมระบุสถานะหมุนจอด้วย GeoJSON และแสดงเวลาเดินทางจริง</p>
-                    <div class="project-tags">
-                        <span class="tag">Leaflet.js</span>
-                        <span class="tag">GeoJSON</span>
-                        <span class="tag">Live Tracking</span>
-                    </div>
-                    <a href="index.html" class="project-link">
-                        <span>เปิดใช้งานแผนที่เต็มรูปแบบ</span> 🚀
-                    </a>
+            <!-- Card 1: เกมส์จับคู่แสนสนุก -->
+            <div class="project-card">
+                <span class="project-icon">🎮</span>
+                <h3>เกมส์จับคู่แสนสนุก</h3>
+                <p>เกมความจำวัดกึ๋น 5 ด่านที่ปลดล็อคตามลำดับ มีระบบจัดอันดับเซฟลงเครื่อง(LocalStorage)
+                    พร้อมแสงสีเสียงตอนชนะที่โคตรจึ้ง</p>
+                <div class="project-tags">
+                    <span class="tag">Game Dev</span>
+                    <span class="tag">Local Storage</span>
+                    <span class="tag">CSS Keyframes</span>
                 </div>
-                <div class="map-container">
-                    <iframe src="index.html" title="GPS Map"></iframe>
-                </div>
+                <a href="fruit-match.html" class="project-link">ทดลองเล่นเกม 🏆</a>
             </div>
 
-            <!-- Standard Cards -->
+            <!-- Card 2: GPS เชียงใหม่-พิษณุโลก -->
+            <div class="project-card">
+                <span class="project-icon">📍</span>
+                <h3>GPS เชียงใหม่-พิษณุโลก</h3>
+                <p>แผนที่การเดินทางเชิงโต้ตอบแบบ Real-time สุดล้ำ แสดงพิกัด GPS ตลอดเส้นทางจากเชียงใหม่มายังพิษณุโลก
+                    พร้อมระบุสถานะหมุนจอด้วย GeoJSON และแสดงเวลาเดินทางจริง</p>
+                <div class="project-tags">
+                    <span class="tag">Leaflet.js</span>
+                    <span class="tag">GeoJSON</span>
+                    <span class="tag">Live Tracking</span>
+                </div>
+                <a href="index.html" class="project-link">เปิดใช้งานแผนที่เต็มรูปแบบ 🚀</a>
+            </div>
+
+            <!-- Card 3: รถไฟจำลอง 3D -->
             <div class="project-card">
                 <span class="project-icon">🚂</span>
-                <h3>3D Northern Express</h3>
+                <h3>รถไฟจำลอง 3D</h3>
                 <p>รถไฟจำลองการเดินทาง 3D ทะลุผ่านป่าดอกไม้ โดยอิงจากข้อมูลพิกัด GPS จริง
                     พร้อมระบบควันที่สมจริงประดุจต้องมนตร์</p>
                 <div class="project-tags">
@@ -697,6 +711,21 @@
                 <a href="travel-3d.html" class="project-link">สัมผัสประสบการณ์ 3D ✨</a>
             </div>
 
+            <!-- Card 4: เรซูเม่ฉบับย่อ วัดใหญ่ -->
+            <div class="project-card">
+                <span class="project-icon">📄</span>
+                <h3>เรซูเม่ฉบับย่อ วัดใหญ่</h3>
+                <p>ประวัติส่วนตัวฉบับย่อ ดีไซน์สุดคลีนแต่ทรงพลัง โหลดไว ปรับปรุงจาก Semantic HTML เพียวๆ ไม่พึ่งพิง
+                    Framework เพื่อความเร็วสูงสุด</p>
+                <div class="project-tags">
+                    <span class="tag">Semantic HTML</span>
+                    <span class="tag">Clean CSS</span>
+                    <span class="tag">Minimalism</span>
+                </div>
+                <a href="cv-v2/index.html" class="project-link">ดูเรซูเม่ฉบับย่อ 📜</a>
+            </div>
+
+            <!-- Card 5: DustBoy Cyber-Dashboard -->
             <div class="project-card">
                 <span class="project-icon">📡</span>
                 <h3>DustBoy Cyber-Dashboard</h3>
@@ -710,6 +739,7 @@
                 <a href="dustboy.html" class="project-link">เปิดแดชบอร์ดล้ำๆ 💠</a>
             </div>
 
+            <!-- Card 6: JIBCHAIN Sensor Dash -->
             <div class="project-card">
                 <span class="project-icon">⛓️</span>
                 <h3>JIBCHAIN Sensor Dash</h3>
@@ -722,32 +752,6 @@
                     <span class="tag">Smart Contract</span>
                 </div>
                 <a href="jibchain-sensor.html" class="project-link">ตรวจสอบบล็อกเชน 🚀</a>
-            </div>
-
-            <div class="project-card">
-                <span class="project-icon">🎮</span>
-                <h3>จับคู่แสนสนุก (Fruit Match)</h3>
-                <p>เกมความจำวัดกึ๋น 5 ด่านที่ปลดล็อคตามลำดับ มีระบบจัดอันดับเซฟลงเครื่อง(LocalStorage)
-                    พร้อมแสงสีเสียงตอนชนะที่โคตรจึ้ง</p>
-                <div class="project-tags">
-                    <span class="tag">Game Dev</span>
-                    <span class="tag">Local Storage</span>
-                    <span class="tag">CSS Keyframes</span>
-                </div>
-                <a href="fruit-match.html" class="project-link">ทดลองเล่นเกม 🏆</a>
-            </div>
-
-            <div class="project-card">
-                <span class="project-icon">📄</span>
-                <h3>Modern Minimalist CV</h3>
-                <p>ประวัติส่วนตัวฉบับย่อ ดีไซน์สุดคลีนแต่ทรงพลัง โหลดไว ปรับปรุงจาก Semantic HTML เพียวๆ ไม่พึ่งพิง
-                    Framework เพื่อความเร็วสูงสุด</p>
-                <div class="project-tags">
-                    <span class="tag">Semantic HTML</span>
-                    <span class="tag">Clean CSS</span>
-                    <span class="tag">Minimalism</span>
-                </div>
-                <a href="cv-v2/index.html" class="project-link">ดูเรซูเม่ฉบับย่อ 📜</a>
             </div>
 
         </div>
