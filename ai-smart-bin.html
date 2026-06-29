@@ -1,585 +1,1034 @@
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI Smart Bin — Recognize Recycle Waste</title>
-  <meta name="description" content="ระบบอัจฉริยะคัดแยกขยะรีไซเคิลด้วย AI — ตรวจจับฝา ฉลาก และน้ำตกค้างด้วย YOLO11" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <style>
-    :root {
-      --green:  #22c55e;
-      --cyan:   #06b6d4;
-      --teal:   #14b8a6;
-      --bg:     #050e08;
-      --bg2:    #0a1a10;
-      --bg3:    #0f2318;
-      --card:   rgba(255,255,255,0.04);
-      --border: rgba(34,197,94,0.18);
-      --text:   #e2f0ea;
-      --muted:  #7aa98a;
-    }
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Smart Bin — Recognize Recycle Waste</title>
+    <meta name="description" content="ระบบอัจฉริยะคัดแยกขยะรีไซเคิลด้วย AI — ตรวจจับฝา ฉลาก และน้ำตกค้างด้วย YOLO11" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <style>
+        :root {
+            --pink: #f472b6;
+            --purple: #a78bfa;
+            --blue: #38bdf8;
+            --indigo: #818cf8;
+            --bg: #0f0a1e;
+            --bg2: #160d2e;
+            --bg3: #1a1035;
+            --card: rgba(255, 255, 255, 0.06);
+            --border: rgba(167, 139, 250, 0.2);
+            --text: #f0eeff;
+            --muted: #b8aee0;
+        }
 
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-    html { scroll-behavior: smooth; }
+        html {
+            scroll-behavior: smooth;
+        }
 
-    body {
-      font-family: 'Inter', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      overflow-x: hidden;
-    }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+        }
 
-    /* ─── NAV ─── */
-    nav {
-      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 1rem 2.5rem;
-      background: rgba(5,14,8,0.85);
-      backdrop-filter: blur(16px);
-      border-bottom: 1px solid var(--border);
-    }
-    .nav-logo {
-      display: flex; align-items: center; gap: .6rem;
-      font-family: 'Space Grotesk', sans-serif;
-      font-weight: 700; font-size: 1.1rem; color: var(--green);
-      text-decoration: none;
-    }
-    .nav-logo .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--green);
-      box-shadow: 0 0 8px var(--green); animation: pulse 2s ease-in-out infinite; }
-    .nav-links { display: flex; gap: 2rem; list-style: none; }
-    .nav-links a { text-decoration: none; color: var(--muted); font-size: .9rem;
-      transition: color .2s; }
-    .nav-links a:hover { color: var(--green); }
+        /* ─── NAV ─── */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 2.5rem;
+            background: rgba(15, 10, 30, 0.88);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+        }
 
-    /* ─── HERO ─── */
-    .hero {
-      min-height: 100vh;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      text-align: center;
-      padding: 8rem 2rem 5rem;
-      position: relative;
-      overflow: hidden;
-    }
-    .hero-bg {
-      position: absolute; inset: 0; z-index: 0;
-      background:
-        radial-gradient(ellipse 80% 60% at 50% 0%, rgba(34,197,94,0.12) 0%, transparent 70%),
-        radial-gradient(ellipse 60% 50% at 80% 80%, rgba(6,182,212,0.08) 0%, transparent 60%),
-        var(--bg);
-    }
-    .grid-lines {
-      position: absolute; inset: 0; z-index: 0;
-      background-image:
-        linear-gradient(rgba(34,197,94,0.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(34,197,94,0.04) 1px, transparent 1px);
-      background-size: 60px 60px;
-    }
-    .hero-content { position: relative; z-index: 1; max-width: 800px; }
-    .badge {
-      display: inline-flex; align-items: center; gap: .5rem;
-      background: rgba(34,197,94,0.12); border: 1px solid rgba(34,197,94,0.3);
-      border-radius: 100px; padding: .35rem 1rem; font-size: .8rem;
-      color: var(--green); font-weight: 600; letter-spacing: .05em;
-      margin-bottom: 1.8rem;
-    }
-    .badge .pulse-dot {
-      width: 7px; height: 7px; border-radius: 50%; background: var(--green);
-      animation: pulse 1.5s ease-in-out infinite;
-    }
-    h1 {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: clamp(2.5rem, 6vw, 4.5rem);
-      font-weight: 800; line-height: 1.1;
-      background: linear-gradient(135deg, #fff 30%, var(--green) 70%, var(--cyan));
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      background-clip: text;
-      margin-bottom: 1.2rem;
-    }
-    .hero-sub {
-      font-size: clamp(1rem, 2vw, 1.2rem); color: var(--muted);
-      line-height: 1.7; max-width: 600px; margin: 0 auto 2.5rem;
-    }
-    .hero-tags {
-      display: flex; flex-wrap: wrap; gap: .7rem; justify-content: center;
-      margin-bottom: 2.5rem;
-    }
-    .tag {
-      padding: .3rem .85rem; border-radius: 100px; font-size: .78rem; font-weight: 600;
-      border: 1px solid; letter-spacing: .03em;
-    }
-    .tag-green { color: var(--green); border-color: rgba(34,197,94,0.4); background: rgba(34,197,94,0.08); }
-    .tag-cyan  { color: var(--cyan);  border-color: rgba(6,182,212,0.4);  background: rgba(6,182,212,0.08); }
-    .tag-teal  { color: var(--teal);  border-color: rgba(20,184,166,0.4);  background: rgba(20,184,166,0.08); }
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: .6rem;
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--pink);
+            text-decoration: none;
+        }
 
-    .status-bar {
-      display: inline-flex; align-items: center; gap: .8rem;
-      background: rgba(255,193,7,0.08); border: 1px solid rgba(255,193,7,0.25);
-      border-radius: 12px; padding: .7rem 1.4rem;
-      font-size: .85rem; color: #fbbf24; font-weight: 500;
-    }
-    .status-icon { font-size: 1.1rem; }
+        .nav-logo .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--pink);
+            box-shadow: 0 0 8px var(--pink);
+            animation: pulse 2s ease-in-out infinite;
+        }
 
-    /* ─── SECTIONS ─── */
-    section { padding: 5rem 2rem; max-width: 1100px; margin: 0 auto; }
-    .section-label {
-      display: flex; align-items: center; gap: .7rem;
-      font-size: .8rem; font-weight: 700; letter-spacing: .1em;
-      text-transform: uppercase; color: var(--green); margin-bottom: 1rem;
-    }
-    .section-label::after {
-      content: ''; flex: 1; height: 1px; background: var(--border);
-    }
-    h2 {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: clamp(1.8rem, 4vw, 2.6rem);
-      font-weight: 700; line-height: 1.2;
-      background: linear-gradient(135deg, #fff 50%, var(--green));
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      background-clip: text; margin-bottom: 1rem;
-    }
-    .section-desc { color: var(--muted); font-size: 1rem; line-height: 1.75; max-width: 640px; margin-bottom: 3rem; }
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
 
-    /* ─── PROBLEM CARDS ─── */
-    .problem-grid {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.25rem;
-    }
-    .prob-card {
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: 16px; padding: 1.8rem;
-      transition: transform .3s, border-color .3s, box-shadow .3s;
-      position: relative; overflow: hidden;
-    }
-    .prob-card::before {
-      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
-      background: linear-gradient(90deg, var(--green), var(--cyan));
-      opacity: 0; transition: opacity .3s;
-    }
-    .prob-card:hover { transform: translateY(-4px); border-color: rgba(34,197,94,0.4); box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
-    .prob-card:hover::before { opacity: 1; }
-    .prob-num {
-      font-size: 2.5rem; font-weight: 900; color: rgba(34,197,94,0.15);
-      font-family: 'Space Grotesk', sans-serif; margin-bottom: .5rem;
-    }
-    .prob-icon { font-size: 1.8rem; margin-bottom: .8rem; }
-    .prob-title { font-size: 1rem; font-weight: 700; color: #fff; margin-bottom: .6rem; }
-    .prob-body { font-size: .9rem; color: var(--muted); line-height: 1.7; }
+        .nav-links a {
+            text-decoration: none;
+            color: var(--muted);
+            font-size: .9rem;
+            transition: color .2s;
+        }
 
-    /* ─── MISSION ─── */
-    .mission-box {
-      background: linear-gradient(135deg, rgba(34,197,94,0.08), rgba(6,182,212,0.06));
-      border: 1px solid rgba(34,197,94,0.25); border-radius: 20px; padding: 2.5rem;
-      display: flex; gap: 2rem; align-items: flex-start;
-    }
-    .mission-icon-wrap {
-      flex-shrink: 0; width: 64px; height: 64px; border-radius: 16px;
-      background: rgba(34,197,94,0.12); border: 1px solid rgba(34,197,94,0.3);
-      display: grid; place-items: center; font-size: 1.8rem;
-    }
-    .mission-body { flex: 1; }
-    .mission-body p { color: var(--muted); line-height: 1.8; font-size: 1rem; }
+        .nav-links a:hover {
+            color: var(--purple);
+        }
 
-    /* ─── OUTCOMES ─── */
-    .outcome-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; }
-    .outcome-card {
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: 16px; padding: 1.8rem;
-      transition: transform .3s, border-color .3s;
-    }
-    .outcome-card:hover { transform: translateY(-4px); border-color: rgba(6,182,212,0.4); }
-    .outcome-icon { font-size: 2rem; margin-bottom: .8rem; }
-    .outcome-title { font-size: 1rem; font-weight: 700; color: var(--cyan); margin-bottom: .6rem; }
-    .outcome-body { font-size: .9rem; color: var(--muted); line-height: 1.7; }
+        /* ─── HERO ─── */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 8rem 2rem 5rem;
+            position: relative;
+            overflow: hidden;
+        }
 
-    /* ─── CHALLENGE ─── */
-    .challenge-wrap { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1px; background: var(--border); border-radius: 16px; overflow: hidden; }
-    .chal-col { background: var(--bg2); padding: 2rem; }
-    .chal-header { font-size: .75rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 1rem; padding-bottom: .6rem; border-bottom: 1px solid var(--border); }
-    .chal-col.problem .chal-header { color: #f87171; }
-    .chal-col.solution .chal-header { color: #fbbf24; }
-    .chal-col.result .chal-header { color: var(--green); }
-    .chal-col p { font-size: .9rem; color: var(--muted); line-height: 1.75; }
+        .hero-bg {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            background:
+                radial-gradient(ellipse 80% 60% at 50% 0%, rgba(244, 114, 182, 0.14) 0%, transparent 65%),
+                radial-gradient(ellipse 60% 50% at 80% 80%, rgba(56, 189, 248, 0.1) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 40% at 10% 60%, rgba(167, 139, 250, 0.1) 0%, transparent 60%),
+                var(--bg);
+        }
 
-    /* ─── ROLE SECTION ─── */
-    .role-header {
-      display: flex; align-items: center; gap: 1rem;
-      background: rgba(6,182,212,0.06); border: 1px solid rgba(6,182,212,0.2);
-      border-radius: 14px; padding: 1.2rem 1.8rem; margin-bottom: 1.8rem;
-    }
-    .role-badge {
-      background: rgba(6,182,212,0.15); border: 1px solid rgba(6,182,212,0.35);
-      border-radius: 8px; padding: .4rem .9rem;
-      font-size: .78rem; font-weight: 700; color: var(--cyan); white-space: nowrap;
-    }
-    .role-title { font-size: 1rem; font-weight: 600; color: #fff; }
-    .role-sub { font-size: .85rem; color: var(--muted); }
+        .grid-lines {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            background-image:
+                linear-gradient(rgba(167, 139, 250, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(167, 139, 250, 0.05) 1px, transparent 1px);
+            background-size: 60px 60px;
+        }
 
-    .achievements { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; }
-    .ach-card {
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: 14px; padding: 1.4rem;
-      display: flex; gap: 1rem; align-items: flex-start;
-      transition: border-color .3s;
-    }
-    .ach-card:hover { border-color: rgba(34,197,94,0.35); }
-    .ach-icon { font-size: 1.4rem; margin-top: .1rem; flex-shrink: 0; }
-    .ach-title { font-size: .9rem; font-weight: 700; color: #fff; margin-bottom: .3rem; }
-    .ach-body { font-size: .83rem; color: var(--muted); line-height: 1.6; }
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+        }
 
-    /* ─── STATS ─── */
-    .stats-row {
-      display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 4rem;
-    }
-    .stat-card {
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: 16px; padding: 1.8rem 1.2rem; text-align: center;
-    }
-    .stat-num {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 2.4rem; font-weight: 800;
-      background: linear-gradient(135deg, var(--green), var(--cyan));
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-    }
-    .stat-label { font-size: .8rem; color: var(--muted); margin-top: .3rem; }
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: .5rem;
+            background: rgba(244, 114, 182, 0.12);
+            border: 1px solid rgba(244, 114, 182, 0.35);
+            border-radius: 100px;
+            padding: .35rem 1rem;
+            font-size: .8rem;
+            color: var(--pink);
+            font-weight: 600;
+            letter-spacing: .05em;
+            margin-bottom: 1.8rem;
+        }
 
-    /* ─── TECH STACK ─── */
-    .tech-grid { display: flex; flex-wrap: wrap; gap: .8rem; }
-    .tech-pill {
-      display: flex; align-items: center; gap: .5rem;
-      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 8px; padding: .5rem 1rem; font-size: .85rem; font-weight: 500;
-      transition: border-color .2s, background .2s;
-    }
-    .tech-pill:hover { background: rgba(34,197,94,0.08); border-color: rgba(34,197,94,0.35); }
-    .tech-pill .icon { font-size: 1.1rem; }
+        .badge .pulse-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--pink);
+            animation: pulse 1.5s ease-in-out infinite;
+        }
 
-    /* ─── FOOTER ─── */
-    footer {
-      border-top: 1px solid var(--border);
-      padding: 2.5rem 2rem; text-align: center;
-      color: var(--muted); font-size: .85rem;
-    }
-    footer strong { color: var(--green); }
+        h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 800;
+            line-height: 1.1;
+            background: linear-gradient(135deg, #ffffff 20%, var(--pink) 50%, var(--purple) 80%, var(--blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1.2rem;
+        }
 
-    /* ─── DIVIDER ─── */
-    .divider {
-      width: 100%; height: 1px;
-      background: linear-gradient(90deg, transparent, var(--border), transparent);
-      margin: 0 auto;
-    }
+        .hero-sub {
+            font-size: clamp(1rem, 2vw, 1.2rem);
+            color: var(--muted);
+            line-height: 1.8;
+            max-width: 600px;
+            margin: 0 auto 2.5rem;
+        }
 
-    /* ─── ANIMATIONS ─── */
-    @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: .6; transform: scale(1.3); }
-    }
-    @keyframes float {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-12px); }
-    }
-    .float { animation: float 5s ease-in-out infinite; }
+        .hero-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .7rem;
+            justify-content: center;
+            margin-bottom: 2.5rem;
+        }
 
-    /* ─── DETECTION DEMO ─── */
-    .demo-box {
-      background: var(--bg3); border: 1px solid var(--border); border-radius: 20px;
-      padding: 1.8rem; margin-top: 1.5rem;
-      display: flex; flex-direction: column; gap: 1rem;
-    }
-    .demo-label { font-size: .75rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
-    .detect-item {
-      display: flex; align-items: center; gap: 1rem;
-      background: rgba(255,255,255,0.03); border-radius: 10px; padding: .8rem 1.1rem;
-      border: 1px solid transparent; transition: border-color .3s;
-    }
-    .detect-item:hover { border-color: var(--border); }
-    .detect-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-    .detect-name { font-size: .9rem; font-weight: 600; color: #fff; flex: 1; }
-    .detect-bar-wrap { flex: 2; background: rgba(255,255,255,0.06); border-radius: 100px; height: 6px; overflow: hidden; }
-    .detect-bar { height: 100%; border-radius: 100px; }
-    .detect-conf { font-size: .8rem; font-weight: 700; }
+        .tag {
+            padding: .3rem .85rem;
+            border-radius: 100px;
+            font-size: .78rem;
+            font-weight: 600;
+            border: 1px solid;
+            letter-spacing: .03em;
+        }
 
-    /* ─── RESPONSIVE ─── */
-    @media (max-width: 768px) {
-      nav { padding: 1rem 1.5rem; }
-      .nav-links { display: none; }
-      .challenge-wrap { grid-template-columns: 1fr; }
-      .stats-row { grid-template-columns: 1fr 1fr; }
-      .mission-box { flex-direction: column; }
-    }
-  </style>
+        .tag-green {
+            color: var(--pink);
+            border-color: rgba(244, 114, 182, 0.45);
+            background: rgba(244, 114, 182, 0.1);
+        }
+
+        .tag-cyan {
+            color: var(--blue);
+            border-color: rgba(56, 189, 248, 0.45);
+            background: rgba(56, 189, 248, 0.1);
+        }
+
+        .tag-teal {
+            color: var(--purple);
+            border-color: rgba(167, 139, 250, 0.45);
+            background: rgba(167, 139, 250, 0.1);
+        }
+
+        .status-bar {
+            display: inline-flex;
+            align-items: center;
+            gap: .8rem;
+            background: rgba(255, 193, 7, 0.08);
+            border: 1px solid rgba(255, 193, 7, 0.25);
+            border-radius: 12px;
+            padding: .7rem 1.4rem;
+            font-size: .85rem;
+            color: #fbbf24;
+            font-weight: 500;
+        }
+
+        .status-icon {
+            font-size: 1.1rem;
+        }
+
+        /* ─── SECTIONS ─── */
+        section {
+            padding: 5rem 2rem;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .section-label {
+            display: flex;
+            align-items: center;
+            gap: .7rem;
+            font-size: .8rem;
+            font-weight: 700;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: var(--purple);
+            margin-bottom: 1rem;
+        }
+
+        .section-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        h2 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(1.8rem, 4vw, 2.6rem);
+            font-weight: 700;
+            line-height: 1.2;
+            background: linear-gradient(135deg, #fff 40%, var(--purple) 80%, var(--pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+        }
+
+        .section-desc {
+            color: var(--muted);
+            font-size: 1rem;
+            line-height: 1.8;
+            max-width: 640px;
+            margin-bottom: 3rem;
+        }
+
+        /* ─── PROBLEM CARDS ─── */
+        .problem-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .prob-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.8rem;
+            transition: transform .3s, border-color .3s, box-shadow .3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .prob-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--pink), var(--purple), var(--blue));
+            opacity: 0;
+            transition: opacity .3s;
+        }
+
+        .prob-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(244, 114, 182, 0.45);
+            box-shadow: 0 20px 40px rgba(167, 139, 250, 0.15);
+        }
+
+        .prob-card:hover::before {
+            opacity: 1;
+        }
+
+        .prob-num {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: rgba(167, 139, 250, 0.2);
+            font-family: 'Space Grotesk', sans-serif;
+            margin-bottom: .5rem;
+        }
+
+        .prob-icon {
+            font-size: 1.8rem;
+            margin-bottom: .8rem;
+        }
+
+        .prob-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: .6rem;
+        }
+
+        .prob-body {
+            font-size: .9rem;
+            color: var(--muted);
+            line-height: 1.75;
+        }
+
+        /* ─── MISSION ─── */
+        .mission-box {
+            background: linear-gradient(135deg, rgba(244, 114, 182, 0.07), rgba(167, 139, 250, 0.08), rgba(56, 189, 248, 0.05));
+            border: 1px solid rgba(167, 139, 250, 0.3);
+            border-radius: 20px;
+            padding: 2.5rem;
+            display: flex;
+            gap: 2rem;
+            align-items: flex-start;
+        }
+
+        .mission-icon-wrap {
+            flex-shrink: 0;
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
+            background: rgba(167, 139, 250, 0.15);
+            border: 1px solid rgba(167, 139, 250, 0.35);
+            display: grid;
+            place-items: center;
+            font-size: 1.8rem;
+        }
+
+        .mission-body {
+            flex: 1;
+        }
+
+        .mission-body p {
+            color: var(--muted);
+            line-height: 1.85;
+            font-size: 1rem;
+        }
+
+        /* ─── OUTCOMES ─── */
+        .outcome-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .outcome-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.8rem;
+            transition: transform .3s, border-color .3s;
+        }
+
+        .outcome-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(56, 189, 248, 0.45);
+            box-shadow: 0 16px 32px rgba(56, 189, 248, 0.1);
+        }
+
+        .outcome-icon {
+            font-size: 2rem;
+            margin-bottom: .8rem;
+        }
+
+        .outcome-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--blue);
+            margin-bottom: .6rem;
+        }
+
+        .outcome-body {
+            font-size: .9rem;
+            color: var(--muted);
+            line-height: 1.75;
+        }
+
+        /* ─── CHALLENGE ─── */
+        .challenge-wrap {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1px;
+            background: var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .chal-col {
+            background: var(--bg2);
+            padding: 2rem;
+        }
+
+        .chal-header {
+            font-size: .75rem;
+            font-weight: 700;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+            padding-bottom: .6rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .chal-col.problem .chal-header {
+            color: #f87171;
+        }
+
+        .chal-col.solution .chal-header {
+            color: #fbbf24;
+        }
+
+        .chal-col.result .chal-header {
+            color: var(--purple);
+        }
+
+        .chal-col p {
+            font-size: .9rem;
+            color: var(--muted);
+            line-height: 1.8;
+        }
+
+        /* ─── ROLE SECTION ─── */
+        .role-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background: rgba(167, 139, 250, 0.07);
+            border: 1px solid rgba(167, 139, 250, 0.25);
+            border-radius: 14px;
+            padding: 1.2rem 1.8rem;
+            margin-bottom: 1.8rem;
+        }
+
+        .role-badge {
+            background: rgba(244, 114, 182, 0.15);
+            border: 1px solid rgba(244, 114, 182, 0.35);
+            border-radius: 8px;
+            padding: .4rem .9rem;
+            font-size: .78rem;
+            font-weight: 700;
+            color: var(--pink);
+            white-space: nowrap;
+        }
+
+        .role-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .role-sub {
+            font-size: .85rem;
+            color: var(--muted);
+        }
+
+        .achievements {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1rem;
+        }
+
+        .ach-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 1.4rem;
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+            transition: border-color .3s, box-shadow .3s;
+        }
+
+        .ach-card:hover {
+            border-color: rgba(167, 139, 250, 0.45);
+            box-shadow: 0 8px 24px rgba(167, 139, 250, 0.1);
+        }
+
+        .ach-icon {
+            font-size: 1.4rem;
+            margin-top: .1rem;
+            flex-shrink: 0;
+        }
+
+        .ach-title {
+            font-size: .9rem;
+            font-weight: 700;
+            color: var(--purple);
+            margin-bottom: .3rem;
+        }
+
+        .ach-body {
+            font-size: .83rem;
+            color: var(--muted);
+            line-height: 1.65;
+        }
+
+        /* ─── STATS ─── */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 4rem;
+        }
+
+        .stat-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.8rem 1.2rem;
+            text-align: center;
+            transition: transform .3s, border-color .3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(244, 114, 182, 0.4);
+        }
+
+        .stat-num {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2.4rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--pink), var(--purple), var(--blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            font-size: .82rem;
+            color: var(--muted);
+            margin-top: .4rem;
+            line-height: 1.5;
+        }
+
+        /* ─── TECH STACK ─── */
+        .tech-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .8rem;
+        }
+
+        .tech-pill {
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+            background: rgba(167, 139, 250, 0.07);
+            border: 1px solid rgba(167, 139, 250, 0.2);
+            border-radius: 8px;
+            padding: .5rem 1rem;
+            font-size: .85rem;
+            font-weight: 500;
+            color: var(--text);
+            transition: border-color .2s, background .2s;
+        }
+
+        .tech-pill:hover {
+            background: rgba(167, 139, 250, 0.14);
+            border-color: rgba(167, 139, 250, 0.45);
+            color: var(--purple);
+        }
+
+        .tech-pill .icon {
+            font-size: 1.1rem;
+        }
+
+        /* ─── FOOTER ─── */
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 2.5rem 2rem;
+            text-align: center;
+            color: var(--muted);
+            font-size: .85rem;
+        }
+
+        footer strong {
+            color: var(--pink);
+        }
+
+        /* ─── DIVIDER ─── */
+        .divider {
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border), transparent);
+            margin: 0 auto;
+        }
+
+        /* ─── ANIMATIONS ─── */
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: .6;
+                transform: scale(1.3);
+            }
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-12px);
+            }
+        }
+
+        .float {
+            animation: float 5s ease-in-out infinite;
+        }
+
+        /* ─── DETECTION DEMO ─── */
+        .demo-box {
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 1.8rem;
+            margin-top: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .demo-label {
+            font-size: .75rem;
+            font-weight: 700;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: var(--purple);
+        }
+
+        .detect-item {
+            flex: 2;
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 100px;
+            height: 6px;
+            overflow: hidden;
+        }
+
+        .detect-bar {
+            height: 100%;
+            border-radius: 100px;
+        }
+
+        .detect-conf {
+            font-size: .8rem;
+            font-weight: 700;
+        }
+
+        /* ─── RESPONSIVE ─── */
+        @media (max-width: 768px) {
+            nav {
+                padding: 1rem 1.5rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .challenge-wrap {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-row {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .mission-box {
+                flex-direction: column;
+            }
+        }
+    </style>
 </head>
+
 <body>
 
-  <!-- NAV -->
-  <nav>
-    <a href="#" class="nav-logo">
-      <div class="dot"></div>
-      AI Smart Bin
-    </a>
-    <ul class="nav-links">
-      <li><a href="#problem">ปัญหา</a></li>
-      <li><a href="#mission">วัตถุประสงค์</a></li>
-      <li><a href="#outcomes">ผลลัพธ์</a></li>
-      <li><a href="#challenge">อุปสรรค</a></li>
-      <li><a href="#role">บทบาท</a></li>
-    </ul>
-  </nav>
+    <!-- NAV -->
+    <nav>
+        <a href="#" class="nav-logo">
+            <div class="dot"></div>
+            AI Smart Bin
+        </a>
+        <ul class="nav-links">
+            <li><a href="#problem">ปัญหา</a></li>
+            <li><a href="#mission">วัตถุประสงค์</a></li>
+            <li><a href="#outcomes">ผลลัพธ์</a></li>
+            <li><a href="#challenge">อุปสรรค</a></li>
+            <li><a href="#role">บทบาท</a></li>
+        </ul>
+    </nav>
 
-  <!-- HERO -->
-  <div class="hero">
-    <div class="hero-bg"></div>
-    <div class="grid-lines"></div>
-    <div class="hero-content">
-      <div class="badge"><div class="pulse-dot"></div>Senior Project · Computer Engineering</div>
-      <h1>AI Smart Bin<br/>Recognize Recycle Waste</h1>
-      <p class="hero-sub">ระบบอัจฉริยะที่ใช้ปัญญาประดิษฐ์ตรวจสอบความพร้อมของขวดพลาสติกก่อนทิ้ง เพื่อยกระดับกระบวนการรีไซเคิลตั้งแต่ต้นทาง</p>
-      <div class="hero-tags">
-        <span class="tag tag-green">♻️ Recycling Tech</span>
-        <span class="tag tag-cyan">🤖 YOLO11</span>
-        <span class="tag tag-green">📷 Computer Vision</span>
-        <span class="tag tag-teal">🔊 Real-time Alert</span>
-        <span class="tag tag-cyan">🐍 Python</span>
-      </div>
-      <div class="status-bar">
-        <span class="status-icon">🚧</span>
-        <span>สถานะ: กำลังพัฒนา (In Development) — ระบบทดสอบทำงานได้แล้ว</span>
-      </div>
-    </div>
-  </div>
-
-  <div class="divider"></div>
-
-  <!-- STATS -->
-  <section>
-    <div class="stats-row">
-      <div class="stat-card">
-        <div class="stat-num">3,692</div>
-        <div class="stat-label">รูปภาพในชุดข้อมูล (Dataset Images)</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-num">100</div>
-        <div class="stat-label">รอบการเทรน (Training Epochs)</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-num">3</div>
-        <div class="stat-label">ประเภทที่ตรวจจับ (Classes)</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-num">1</div>
-        <div class="stat-label">โมเดลกลาง (Single Model)</div>
-      </div>
-    </div>
-
-    <!-- Tech Stack -->
-    <div class="section-label">⚙️ Tech Stack</div>
-    <div class="tech-grid">
-      <div class="tech-pill"><span class="icon">🧠</span> YOLO11</div>
-      <div class="tech-pill"><span class="icon">🐍</span> Python</div>
-      <div class="tech-pill"><span class="icon">👁️</span> OpenCV</div>
-      <div class="tech-pill"><span class="icon">🔥</span> PyTorch</div>
-      <div class="tech-pill"><span class="icon">📊</span> Roboflow</div>
-      <div class="tech-pill"><span class="icon">📷</span> Webcam / Camera</div>
-      <div class="tech-pill"><span class="icon">🔊</span> Text-to-Speech Alert</div>
-    </div>
-  </section>
-
-  <div class="divider"></div>
-
-  <!-- PROBLEM -->
-  <section id="problem">
-    <div class="section-label">📌 01 — ที่มาและปัญหา</div>
-    <h2>ปัญหาที่ต้องการแก้ไข</h2>
-    <p class="section-desc">การจัดการขยะพลาสติกในปัจจุบันยังมีช่องโหว่ที่ส่งผลเสียต่อระบบรีไซเคิลโดยรวม</p>
-    <div class="problem-grid">
-      <div class="prob-card">
-        <div class="prob-num">01</div>
-        <div class="prob-icon">🗑️</div>
-        <div class="prob-title">คัดแยกไม่ถูกต้องตั้งแต่ต้นทาง</div>
-        <div class="prob-body">ผู้คนยังขาดความเข้าใจในการคัดแยกขวดพลาสติก ทำให้ขยะที่มีสภาพดีและพร้อมรีไซเคิลปนเปื้อนกับขยะทั่วไป เสียโอกาสในการนำกลับมาใช้ใหม่ได้ทันที</div>
-      </div>
-      <div class="prob-card">
-        <div class="prob-num">02</div>
-        <div class="prob-icon">⚗️</div>
-        <div class="prob-title">สิ่งเจือปนทำให้กระบวนการล่าช้า</div>
-        <div class="prob-body">ขยะที่ยังมีฝาขวด ฉลาก หรือของเหลวตกค้าง ทำให้โรงงานรีไซเคิลต้องเสียเวลาและทรัพยากรเพิ่มเติมในการกำจัดสิ่งปนเปื้อนเหล่านี้ก่อน ส่งผลให้กระบวนการขาดประสิทธิภาพ</div>
-      </div>
-      <div class="prob-card">
-        <div class="prob-num">03</div>
-        <div class="prob-icon">📉</div>
-        <div class="prob-title">มูลค่าขยะลดลง กระทบเศรษฐกิจหมุนเวียน</div>
-        <div class="prob-body">หากพลาสติกต่างชนิดกันไม่ถูกแยกออกจากกันอย่างละเอียด มูลค่าของขยะรีไซเคิลจะลดลงอย่างมาก และส่งผลเสียต่อ Circular Economy ในระยะยาว</div>
-      </div>
-    </div>
-  </section>
-
-  <div class="divider"></div>
-
-  <!-- MISSION -->
-  <section id="mission">
-    <div class="section-label">🎯 02 — วัตถุประสงค์</div>
-    <h2>Mission</h2>
-    <div class="mission-box">
-      <div class="mission-icon-wrap">🎯</div>
-      <div class="mission-body">
-        <p>
-          เพื่อ<strong style="color:#fff"> เพิ่มประสิทธิภาพและรักษามาตรฐานความสะอาดของขยะรีไซเคิล</strong> โดยการนำ <strong style="color:var(--green)">เทคโนโลยีปัญญาประดิษฐ์ (AI)</strong> เข้ามาตรวจสอบระดับของส่วนประกอบขวดพลาสติกอย่างละเอียด ครอบคลุมทั้ง:
-        </p>
-        <br/>
-        <div style="display:flex;flex-wrap:wrap;gap:.6rem;margin-top:.2rem;">
-          <span class="tag tag-green">🔵 ฝาขวด (Cap)</span>
-          <span class="tag tag-cyan">🏷️ ฉลาก (Label)</span>
-          <span class="tag tag-teal">💧 น้ำตกค้าง (Liquid)</span>
+    <!-- HERO -->
+    <div class="hero">
+        <div class="hero-bg"></div>
+        <div class="grid-lines"></div>
+        <div class="hero-content">
+            <div class="badge">
+                <div class="pulse-dot"></div>Senior Project · Computer Engineering
+            </div>
+            <h1>AI Smart Bin<br />Recognize Recycle Waste</h1>
+            <p class="hero-sub">ระบบอัจฉริยะที่ใช้ปัญญาประดิษฐ์ตรวจสอบความพร้อมของขวดพลาสติกก่อนทิ้ง
+                เพื่อยกระดับกระบวนการรีไซเคิลตั้งแต่ต้นทาง</p>
+            <div class="hero-tags">
+                <span class="tag tag-green">♻️ Recycling Tech</span>
+                <span class="tag tag-cyan">🤖 YOLO11</span>
+                <span class="tag tag-green">📷 Computer Vision</span>
+                <span class="tag tag-teal">🔊 Real-time Alert</span>
+                <span class="tag tag-cyan">🐍 Python</span>
+            </div>
+            <div class="status-bar">
+                <span class="status-icon">🚧</span>
+                <span>สถานะ: กำลังพัฒนา (In Development) — ระบบทดสอบทำงานได้แล้ว</span>
+            </div>
         </div>
-        <br/>
-        <p>เพื่อการันตีว่าขยะที่ผ่าน Smart Bin จะ<strong style="color:#fff"> สะอาดและพร้อมเข้าสู่กระบวนการรีไซเคิลทันที</strong> โดยไม่ต้องผ่านขั้นตอนทำความสะอาดซ้ำซ้อนที่ปลายทาง</p>
-      </div>
-    </div>
-  </section>
-
-  <div class="divider"></div>
-
-  <!-- OUTCOMES -->
-  <section id="outcomes">
-    <div class="section-label">✨ 03 — ผลลัพธ์ที่คาดหวัง</div>
-    <h2>Expected Outcomes</h2>
-    <p class="section-desc">สิ่งที่โปรเจคนี้จะสร้างให้เกิดขึ้นได้จริงเมื่อพัฒนาเสร็จสมบูรณ์</p>
-    <div class="outcome-grid">
-      <div class="outcome-card">
-        <div class="outcome-icon">🚀</div>
-        <div class="outcome-title">ระบบที่ใช้งานได้จริง เสถียร แม่นยำ</div>
-        <div class="outcome-body">ระบบพร้อมนำไปติดตั้งในพื้นที่สาธารณะได้จริง มีประสิทธิภาพการตรวจจับสูง เพื่อเป็นผู้ช่วยที่เชื่อถือได้ในการจัดการขยะ</div>
-      </div>
-      <div class="outcome-card">
-        <div class="outcome-icon">🎯</div>
-        <div class="outcome-title">แก้ปัญหาตรงจุดที่ต้นทาง</div>
-        <div class="outcome-body">ช่วยให้ผู้ใช้งานแยกส่วนประกอบของขวดน้ำ (ฝา, ฉลาก, และน้ำ) ออกได้อย่างถูกต้องก่อนทิ้ง แก้ปัญหาความสกปรกตั้งแต่ขั้นตอนแรก</div>
-      </div>
-      <div class="outcome-card">
-        <div class="outcome-icon">⚡</div>
-        <div class="outcome-title">ยกระดับอุตสาหกรรมรีไซเคิล</div>
-        <div class="outcome-body">เมื่อขยะสะอาดตั้งแต่ต้นทาง จะช่วยลดขั้นตอนที่โรงงาน ประหยัดเวลาและทรัพยากร ทำให้กระบวนการรีไซเคิลโดยรวมคล่องตัวและมีประสิทธิภาพมากขึ้น</div>
-      </div>
-    </div>
-  </section>
-
-  <div class="divider"></div>
-
-  <!-- CHALLENGE -->
-  <section id="challenge">
-    <div class="section-label">⚔️ 04 — ปัญหาและการแก้ไข</div>
-    <h2>Challenges & Solutions</h2>
-    <p class="section-desc">อุปสรรคที่พบในระหว่างการพัฒนา และวิธีที่ทีมใช้แก้ไขปัญหา</p>
-    <div class="challenge-wrap">
-      <div class="chal-col problem">
-        <div class="chal-header">🚫 ปัญหา (Problem)</div>
-        <p>โมเดลที่แยกกันเทรน (น้ำ กับ ฝา+ฉลาก) เมื่อนำมารวมกัน เกิดอาการ <strong style="color:#f87171">แย่งกันทำงาน</strong> ตรวจจับพร้อมกันไม่ได้ในเฟรมเดียว ทั้งยังมีปัญหาระบบเสียงแสดงผลสลับประเภทกัน</p>
-      </div>
-      <div class="chal-col solution">
-        <div class="chal-header">💡 วิธีแก้ไข (Solution)</div>
-        <p>ตัดสินใจ <strong style="color:#fbbf24">รวม Dataset ของทุกคนในทีม</strong> เข้าด้วยกัน จัดเรียง Index ข้อมูลใหม่ให้ตรงกัน แล้วเทรนใหม่ให้เป็น <strong style="color:#fbbf24">โมเดลกลางตัวเดียว (Single Model)</strong></p>
-      </div>
-      <div class="chal-col result">
-        <div class="chal-header">🎉 ผลลัพธ์ (Result)</div>
-        <p>ระบบทำงานได้<strong style="color:var(--green)"> สมบูรณ์!</strong> AI สามารถตรวจจับทั้ง 3 ประเภท (น้ำ, ฝา, ฉลาก) <strong style="color:var(--green)">พร้อมกันในเฟรมเดียว</strong> และระบบเสียงแจ้งเตือนทำงานถูกต้อง</p>
-      </div>
     </div>
 
-    <!-- detection demo visualization -->
-    <div class="demo-box">
-      <div class="demo-label">🔍 Real-time Detection Preview — ตัวอย่างผลการตรวจจับ</div>
-      <div class="detect-item">
-        <div class="detect-dot" style="background:#22c55e;box-shadow:0 0 6px #22c55e;"></div>
-        <div class="detect-name">💧 Water (น้ำตกค้าง)</div>
-        <div class="detect-bar-wrap"><div class="detect-bar" style="width:88%;background:linear-gradient(90deg,#22c55e,#16a34a);"></div></div>
-        <div class="detect-conf" style="color:#22c55e;">88%</div>
-      </div>
-      <div class="detect-item">
-        <div class="detect-dot" style="background:#06b6d4;box-shadow:0 0 6px #06b6d4;"></div>
-        <div class="detect-name">🔵 Cap (ฝาขวด)</div>
-        <div class="detect-bar-wrap"><div class="detect-bar" style="width:91%;background:linear-gradient(90deg,#06b6d4,#0891b2);"></div></div>
-        <div class="detect-conf" style="color:#06b6d4;">91%</div>
-      </div>
-      <div class="detect-item">
-        <div class="detect-dot" style="background:#a78bfa;box-shadow:0 0 6px #a78bfa;"></div>
-        <div class="detect-name">🏷️ Label (ฉลาก)</div>
-        <div class="detect-bar-wrap"><div class="detect-bar" style="width:84%;background:linear-gradient(90deg,#a78bfa,#7c3aed);"></div></div>
-        <div class="detect-conf" style="color:#a78bfa;">84%</div>
-      </div>
-    </div>
-  </section>
+    <div class="divider"></div>
 
-  <div class="divider"></div>
-
-  <!-- ROLE -->
-  <section id="role">
-    <div class="section-label">👩‍💻 05 — บทบาทและความรับผิดชอบ</div>
-    <h2>My Role</h2>
-    <div class="role-header">
-      <div>
-        <div class="role-title">AI Model & Data Integration</div>
-        <div class="role-sub">ผู้พัฒนาโมเดลปัญญาประดิษฐ์และการบูรณาการข้อมูล</div>
-      </div>
-      <div class="role-badge">Core Developer</div>
-    </div>
-    <div class="achievements">
-      <div class="ach-card">
-        <div class="ach-icon">📊</div>
-        <div>
-          <div class="ach-title">Data Management</div>
-          <div class="ach-body">รวบรวมและบริหารจัดการชุดข้อมูลภาพจากสมาชิกในทีมรวม <strong style="color:var(--green)">3,692 รูป</strong> สร้างเป็นฐานข้อมูลกลางที่สมบูรณ์</div>
+    <!-- STATS -->
+    <section>
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-num">3,692</div>
+                <div class="stat-label">รูปภาพในชุดข้อมูล (Dataset Images)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-num">100</div>
+                <div class="stat-label">รอบการเทรน (Training Epochs)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-num">3</div>
+                <div class="stat-label">ประเภทที่ตรวจจับ (Classes)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-num">1</div>
+                <div class="stat-label">โมเดลกลาง (Single Model)</div>
+            </div>
         </div>
-      </div>
-      <div class="ach-card">
-        <div class="ach-icon">🧠</div>
-        <div>
-          <div class="ach-title">Model Training</div>
-          <div class="ach-body">ฝึกสอนโมเดลด้วย <strong style="color:var(--cyan)">YOLO11</strong> จำนวน <strong style="color:var(--green)">100 Epochs</strong> จนได้ไฟล์ <code style="color:var(--green);font-family:monospace;">best.pt</code> ที่มีความแม่นยำสูง</div>
-        </div>
-      </div>
-      <div class="ach-card">
-        <div class="ach-icon">🛠️</div>
-        <div>
-          <div class="ach-title">Optimization</div>
-          <div class="ach-body">แก้ปัญหาชื่อวัตถุสลับกันด้วยเทคนิค <strong style="color:#fff">"การจัดคิวชื่อ"</strong> และเพิ่มความหลากหลายของภาพ เพื่อดันประสิทธิภาพโมเดลให้สูงที่สุด</div>
-        </div>
-      </div>
-      <div class="ach-card">
-        <div class="ach-icon">🏅</div>
-        <div>
-          <div class="ach-title">Result Achieved</div>
-          <div class="ach-body">โมเดลวิเคราะห์ <strong style="color:var(--green)">ฝา, ฉลาก และระดับน้ำ พร้อมกันในครั้งเดียว</strong> อย่างแม่นยำในเฟรมเดียว</div>
-        </div>
-      </div>
-    </div>
-  </section>
 
-  <div class="divider"></div>
+        <!-- Tech Stack -->
+        <div class="section-label">⚙️ Tech Stack</div>
+        <div class="tech-grid">
+            <div class="tech-pill"><span class="icon">🧠</span> YOLO11</div>
+            <div class="tech-pill"><span class="icon">🐍</span> Python</div>
+            <div class="tech-pill"><span class="icon">👁️</span> OpenCV</div>
+            <div class="tech-pill"><span class="icon">🔥</span> PyTorch</div>
+            <div class="tech-pill"><span class="icon">📊</span> Roboflow</div>
+            <div class="tech-pill"><span class="icon">📷</span> Webcam / Camera</div>
+            <div class="tech-pill"><span class="icon">🔊</span> Text-to-Speech Alert</div>
+        </div>
+    </section>
 
-  <!-- STATUS -->
-  <section>
-    <div style="text-align:center; padding: 2rem 1rem;">
-      <div class="section-label" style="justify-content:center;">🚀 สถานะโปรเจค</div>
-      <h2 style="text-align:center;">Current Status</h2>
-      <p style="color:var(--muted);max-width:560px;margin:1rem auto 2rem;line-height:1.75;">
-        ระบบสามารถรันผ่านกล้องได้แล้ว AI ตรวจจับ ฝา, ฉลาก และน้ำที่ตกค้างได้อย่างแม่นยำ พร้อมส่ง<strong style="color:#fff"> เสียงแจ้งเตือน</strong>โต้ตอบแบบ Real-time ขณะนี้อยู่ในช่วงพัฒนาและปรับ<strong style="color:var(--green)"> ความเสถียร (Stability)</strong> ก่อนนำไปใช้งานจริง
-      </p>
-      <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
-        <div class="tag tag-green" style="padding:.5rem 1.2rem;font-size:.9rem;">✅ ตรวจจับผ่านกล้องได้</div>
-        <div class="tag tag-green" style="padding:.5rem 1.2rem;font-size:.9rem;">✅ เสียงแจ้งเตือน Real-time</div>
-        <div class="tag tag-green" style="padding:.5rem 1.2rem;font-size:.9rem;">✅ ตรวจจับ 3 ประเภทพร้อมกัน</div>
-        <div class="tag" style="padding:.5rem 1.2rem;font-size:.9rem;color:#fbbf24;border-color:rgba(251,191,36,0.4);background:rgba(251,191,36,0.08);">🔄 กำลังพัฒนาความเสถียร</div>
-      </div>
-    </div>
-  </section>
+    <div class="divider"></div>
 
-  <!-- FOOTER -->
-  <footer>
-    <p style="margin-bottom:.4rem;">🌱 <strong>AI Smart Bin: Recognize Recycle Waste</strong></p>
-    <p>ระบบอัจฉริยะคัดแยกขยะรีไซเคิลด้วย AI — Senior Project · Computer Engineering</p>
-  </footer>
+    <!-- PROBLEM -->
+    <section id="problem">
+        <div class="section-label">📌 01 — ที่มาและปัญหา</div>
+        <h2>ปัญหาที่ต้องการแก้ไข</h2>
+        <p class="section-desc">การจัดการขยะพลาสติกในปัจจุบันยังมีช่องโหว่ที่ส่งผลเสียต่อระบบรีไซเคิลโดยรวม</p>
+        <div class="problem-grid">
+            <div class="prob-card">
+                <div class="prob-num">01</div>
+                <div class="prob-icon">🗑️</div>
+                <div class="prob-title">คัดแยกไม่ถูกต้องตั้งแต่ต้นทาง</div>
+                <div class="prob-body">ผู้คนยังขาดความเข้าใจในการคัดแยกขวดพลาสติก
+                    ทำให้ขยะที่มีสภาพดีและพร้อมรีไซเคิลปนเปื้อนกับขยะทั่วไป เสียโอกาสในการนำกลับมาใช้ใหม่ได้ทันที</div>
+            </div>
+            <div class="prob-card">
+                <div class="prob-num">02</div>
+                <div class="prob-icon">⚗️</div>
+                <div class="prob-title">สิ่งเจือปนทำให้กระบวนการล่าช้า</div>
+                <div class="prob-body">ขยะที่ยังมีฝาขวด ฉลาก หรือของเหลวตกค้าง
+                    ทำให้โรงงานรีไซเคิลต้องเสียเวลาและทรัพยากรเพิ่มเติมในการกำจัดสิ่งปนเปื้อนเหล่านี้ก่อน
+                    ส่งผลให้กระบวนการขาดประสิทธิภาพ</div>
+            </div>
+            <div class="prob-card">
+                <div class="prob-num">03</div>
+                <div class="prob-icon">📉</div>
+                <div class="prob-title">มูลค่าขยะลดลง กระทบเศรษฐกิจหมุนเวียน</div>
+                <div class="prob-body">หากพลาสติกต่างชนิดกันไม่ถูกแยกออกจากกันอย่างละเอียด
+                    มูลค่าของขยะรีไซเคิลจะลดลงอย่างมาก และส่งผลเสียต่อ Circular Economy ในระยะยาว</div>
+            </div>
+        </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- MISSION -->
+    <section id="mission">
+        <div class="section-label">🎯 02 — วัตถุประสงค์</div>
+        <h2>Mission</h2>
+        <div class="mission-box">
+            <div class="mission-icon-wrap">🎯</div>
+            <div class="mission-body">
+                <p>
+                    เพื่อ<strong style="color:#fff"> เพิ่มประสิทธิภาพและรักษามาตรฐานความสะอาดของขยะรีไซเคิล</strong>
+                    โดยการนำ <strong style="color:var(--pink)">เทคโนโลยีปัญญาประดิษฐ์ (AI)</strong>
+                    เข้ามาตรวจสอบระดับของส่วนประกอบขวดพลาสติกอย่างละเอียด ครอบคลุมทั้ง:
+                </p>
+                <br />
+                <div style="display:flex;flex-wrap:wrap;gap:.6rem;margin-top:.2rem;">
+                    <span class="tag tag-green">🔵 ฝาขวด (Cap)</span>
+                    <span class="tag tag-cyan">🏷️ ฉลาก (Label)</span>
+                    <span class="tag tag-teal">💧 น้ำตกค้าง (Liquid)</span>
+                </div>
+                <br />
+                <p>เพื่อการันตีว่าขยะที่ผ่าน Smart Bin จะ<strong style="color:var(--purple)">
+                        สะอาดและพร้อมเข้าสู่กระบวนการรีไซเคิลทันที</strong>
+                    โดยไม่ต้องผ่านขั้นตอนทำความสะอาดซ้ำซ้อนที่ปลายทาง</p>
+            </div>
+        </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- OUTCOMES -->
+    <section id="outcomes">
+        <div class="section-label">✨ 03 — ผลลัพธ์ที่คาดหวัง</div>
+        <h2>Expected Outcomes</h2>
+        <p class="section-desc">สิ่งที่โปรเจคนี้จะสร้างให้เกิดขึ้นได้จริงเมื่อพัฒนาเสร็จสมบูรณ์</p>
+        <div class="outcome-grid">
+            <div class="outcome-card">
+                <div class="outcome-icon">🚀</div>
+                <div class="outcome-title">ระบบที่ใช้งานได้จริง เสถียร แม่นยำ</div>
+                <div class="outcome-body">ระบบพร้อมนำไปติดตั้งในพื้นที่สาธารณะได้จริง มีประสิทธิภาพการตรวจจับสูง
+                    เพื่อเป็นผู้ช่วยที่เชื่อถือได้ในการจัดการขยะ</div>
+            </div>
+            <div class="outcome-card">
+                <div class="outcome-icon">🎯</div>
+                <div class="outcome-title">แก้ปัญหาตรงจุดที่ต้นทาง</div>
+                <div class="outcome-body">ช่วยให้ผู้ใช้งานแยกส่วนประกอบของขวดน้ำ (ฝา, ฉลาก, และน้ำ)
+                    ออกได้อย่างถูกต้องก่อนทิ้ง แก้ปัญหาความสกปรกตั้งแต่ขั้นตอนแรก</div>
+            </div>
+            <div class="outcome-card">
+                <div class="outcome-icon">⚡</div>
+                <div class="outcome-title">ยกระดับอุตสาหกรรมรีไซเคิล</div>
+                <div class="outcome-body">เมื่อขยะสะอาดตั้งแต่ต้นทาง จะช่วยลดขั้นตอนที่โรงงาน ประหยัดเวลาและทรัพยากร
+                    ทำให้กระบวนการรีไซเคิลโดยรวมคล่องตัวและมีประสิทธิภาพมากขึ้น</div>
+            </div>
+        </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- CHALLENGE -->
+    <section id="challenge">
+        <div class="section-label">⚔️ 04 — ปัญหาและการแก้ไข</div>
+        <h2>Challenges & Solutions</h2>
+        <p class="section-desc">อุปสรรคที่พบในระหว่างการพัฒนา และวิธีที่ทีมใช้แก้ไขปัญหา</p>
+        <div class="challenge-wrap">
+            <div class="chal-col problem">
+                <div class="chal-header">🚫 ปัญหา (Problem)</div>
+                <p>โมเดลที่แยกกันเทรน (น้ำ กับ ฝา+ฉลาก) เมื่อนำมารวมกัน เกิดอาการ <strong
+                        style="color:#f87171">แย่งกันทำงาน</strong> ตรวจจับพร้อมกันไม่ได้ในเฟรมเดียว
+                    ทั้งยังมีปัญหาระบบเสียงแสดงผลสลับประเภทกัน</p>
+            </div>
+            <div class="chal-col solution">
+                <div class="chal-header">💡 วิธีแก้ไข (Solution)</div>
+                <p>ตัดสินใจ <strong style="color:#fbbf24">รวม Dataset ของทุกคนในทีม</strong> เข้าด้วยกัน จัดเรียง Index
+                    ข้อมูลใหม่ให้ตรงกัน แล้วเทรนใหม่ให้เป็น <strong style="color:#fbbf24">โมเดลกลางตัวเดียว (Single
+                        Model)</strong></p>
+            </div>
+            <div class="chal-col result">
+                <div class="chal-header">🎉 ผลลัพธ์ (Result)</div>
+                <p>ระบบทำงานได้<strong style="color:var(--purple)"> สมบูรณ์!</strong> AI สามารถตรวจจับทั้ง 3 ประเภท
+                    (น้ำ,
+                    ฝา, ฉลาก) <strong style="color:var(--pink)">พร้อมกันในเฟรมเดียว</strong>
+                    และระบบเสียงแจ้งเตือนทำงานถูกต้อง</p>
+            </div>
+        </div>
+
+        <!-- detection demo visualization -->
+        <div class="demo-box">
+            <div class="demo-label">🔍 Real-time Detection Preview — ตัวอย่างผลการตรวจจับ</div>
+            <div class="detect-item">
+                <div class="detect-dot" style="background:#f472b6;box-shadow:0 0 8px #f472b6;"></div>
+                <div class="detect-name">💧 Water (น้ำตกค้าง)</div>
+                <div class="detect-bar-wrap">
+                    <div class="detect-bar" style="width:88%;background:linear-gradient(90deg,#f472b6,#ec4899);"></div>
+                </div>
+                <div class="detect-conf" style="color:#f472b6;">88%</div>
+            </div>
+            <div class="detect-item">
+                <div class="detect-dot" style="background:#38bdf8;box-shadow:0 0 8px #38bdf8;"></div>
+                <div class="detect-name">🔵 Cap (ฝาขวด)</div>
+                <div class="detect-bar-wrap">
+                    <div class="detect-bar" style="width:91%;background:linear-gradient(90deg,#38bdf8,#0ea5e9);"></div>
+                </div>
+                <div class="detect-conf" style="color:#38bdf8;">91%</div>
+            </div>
+            <div class="detect-item">
+                <div class="detect-dot" style="background:#a78bfa;box-shadow:0 0 6px #a78bfa;"></div>
+                <div class="detect-name">🏷️ Label (ฉลาก)</div>
+                <div class="detect-bar-wrap">
+                    <div class="detect-bar" style="width:84%;background:linear-gradient(90deg,#a78bfa,#7c3aed);"></div>
+                </div>
+                <div class="detect-conf" style="color:#a78bfa;">84%</div>
+            </div>
+        </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ROLE -->
+    <section id="role">
+        <div class="section-label">👩‍💻 05 — บทบาทและความรับผิดชอบ</div>
+        <h2>My Role</h2>
+        <div class="role-header">
+            <div>
+                <div class="role-title">AI Model & Data Integration</div>
+                <div class="role-sub">ผู้พัฒนาโมเดลปัญญาประดิษฐ์และการบูรณาการข้อมูล</div>
+            </div>
+            <div class="role-badge">Core Developer</div>
+        </div>
+        <div class="achievements">
+            <div class="ach-card">
+                <div class="ach-icon">📊</div>
+                <div>
+                    <div class="ach-title">Data Management</div>
+                    <div class="ach-body">รวบรวมและบริหารจัดการชุดข้อมูลภาพจากสมาชิกในทีมรวม <strong
+                            style="color:var(--pink)">3,692 รูป</strong> สร้างเป็นฐานข้อมูลกลางที่สมบูรณ์</div>
+                </div>
+            </div>
+            <div class="ach-card">
+                <div class="ach-icon">🧠</div>
+                <div>
+                    <div class="ach-title">Model Training</div>
+                    <div class="ach-body">ฝึกสอนโมเดลด้วย <strong style="color:var(--blue)">YOLO11</strong> จำนวน
+                        <strong style="color:var(--purple)">100 Epochs</strong> จนได้ไฟล์ <code
+                            style="color:var(--pink);font-family:monospace;">best.pt</code> ที่มีความแม่นยำสูง
+                    </div>
+                </div>
+            </div>
+            <div class="ach-card">
+                <div class="ach-icon">🛠️</div>
+                <div>
+                    <div class="ach-title">Optimization</div>
+                    <div class="ach-body">แก้ปัญหาชื่อวัตถุสลับกันด้วยเทคนิค <strong
+                            style="color:#fff">"การจัดคิวชื่อ"</strong> และเพิ่มความหลากหลายของภาพ
+                        เพื่อดันประสิทธิภาพโมเดลให้สูงที่สุด</div>
+                </div>
+            </div>
+            <div class="ach-card">
+                <div class="ach-icon">🏅</div>
+                <div>
+                    <div class="ach-title">Result Achieved</div>
+                    <div class="ach-body">โมเดลวิเคราะห์ <strong style="color:var(--pink)">ฝา, ฉลาก และระดับน้ำ
+                            พร้อมกันในครั้งเดียว</strong> อย่างแม่นยำในเฟรมเดียว</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- STATUS -->
+    <section>
+        <div style="text-align:center; padding: 2rem 1rem;">
+            <div class="section-label" style="justify-content:center;">🚀 สถานะโปรเจค</div>
+            <h2 style="text-align:center;">Current Status</h2>
+            <p style="color:var(--muted);max-width:560px;margin:1rem auto 2rem;line-height:1.75;">
+                ระบบสามารถรันผ่านกล้องได้แล้ว AI ตรวจจับ ฝา, ฉลาก และน้ำที่ตกค้างได้อย่างแม่นยำ พร้อมส่ง<strong
+                    style="color:#fff"> เสียงแจ้งเตือน</strong>โต้ตอบแบบ Real-time ขณะนี้อยู่ในช่วงพัฒนาและปรับ<strong
+                    style="color:var(--purple)"> ความเสถียร (Stability)</strong> ก่อนนำไปใช้งานจริง
+            </p>
+            <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+                <div class="tag tag-green" style="padding:.5rem 1.2rem;font-size:.9rem;">✅ ตรวจจับผ่านกล้องได้</div>
+                <div class="tag tag-cyan" style="padding:.5rem 1.2rem;font-size:.9rem;">✅ เสียงแจ้งเตือน Real-time
+                </div>
+                <div class="tag tag-teal" style="padding:.5rem 1.2rem;font-size:.9rem;">✅ ตรวจจับ 3 ประเภทพร้อมกัน
+                </div>
+                <div class="tag"
+                    style="padding:.5rem 1.2rem;font-size:.9rem;color:#fbbf24;border-color:rgba(251,191,36,0.4);background:rgba(251,191,36,0.08);">
+                    🔄 กำลังพัฒนาความเสถียร</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <p style="margin-bottom:.4rem;">🌱 <strong>AI Smart Bin: Recognize Recycle Waste</strong></p>
+        <p>ระบบอัจฉริยะคัดแยกขยะรีไซเคิลด้วย AI — Senior Project · Computer Engineering</p>
+    </footer>
 
 </body>
+
 </html>
