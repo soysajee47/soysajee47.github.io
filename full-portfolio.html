@@ -6,16 +6,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>แฟ้มสะสมผลงานฉบับเต็ม | นางสาวสร้อยศจี จันทวงค์</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Outfit:wght@300;400;600;800&family=Prompt:wght@300;400;500;600;700&display=swap');
 
         :root {
-            --primary: #818cf8;
+            --primary: #00e5ff;
             --secondary: #c084fc;
-            --bg: #03030d;
-            --card-bg: rgba(255, 255, 255, 0.03);
-            --card-border: rgba(255, 255, 255, 0.05);
-            --text-main: #f8fafc;
-            --text-sub: #94a3b8;
+            --bg: #030712;
+            --card-bg: rgba(11, 15, 25, 0.6);
+            --card-border: rgba(0, 229, 255, 0.15);
+            --text-main: #f3f4f6;
+            --text-sub: #9ca3af;
         }
 
         * {
@@ -30,6 +30,20 @@
             color: var(--text-main);
             overflow-x: hidden;
             min-height: 100vh;
+            position: relative;
+        }
+
+        /* Tech Cyber Grid Background */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: 
+                linear-gradient(rgba(0, 229, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 229, 255, 0.02) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -3;
+            pointer-events: none;
         }
 
         /* Twinkling Star Canvas Background */
@@ -48,7 +62,7 @@
             width: 40vw;
             height: 40vw;
             border-radius: 50%;
-            background: radial-gradient(circle, rgba(129, 140, 248, 0.1) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(0, 229, 255, 0.08) 0%, transparent 70%);
             z-index: -1;
             pointer-events: none;
             filter: blur(80px);
@@ -62,7 +76,7 @@
         .glow-2 {
             bottom: 10%;
             right: -10%;
-            background: radial-gradient(circle, rgba(192, 132, 252, 0.08) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(192, 132, 252, 0.06) 0%, transparent 70%);
         }
 
         .container {
@@ -101,6 +115,7 @@
             background-clip: text;
             -webkit-text-fill-color: transparent;
             letter-spacing: 1px;
+            font-family: 'Outfit', sans-serif;
         }
 
         .btn-back {
@@ -118,12 +133,13 @@
             transition: all 0.3s ease;
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
+            font-family: 'Fira Code', monospace;
         }
 
         .btn-back:hover {
             background: rgba(255, 255, 255, 0.08);
             border-color: var(--primary);
-            box-shadow: 0 0 20px rgba(129, 140, 248, 0.2);
+            box-shadow: 0 0 20px rgba(0, 229, 255, 0.3);
             transform: translateX(-3px);
         }
 
@@ -136,7 +152,7 @@
         .intro h1 {
             font-size: 2.2rem;
             margin-bottom: 1rem;
-            background: linear-gradient(135deg, #ffffff, #a5b4fc, #c084fc);
+            background: linear-gradient(135deg, #ffffff, var(--primary), var(--secondary));
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -177,29 +193,65 @@
             height: 100%;
             object-fit: cover;
             transition: transform 0.6s ease;
+            padding-top: 32px; /* Pad top to make room for terminal header */
+        }
+
+        .card-terminal-header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 0.5rem 1rem;
+            background: rgba(11, 15, 25, 0.85);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            z-index: 10;
+        }
+
+        .card-terminal-header .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .card-terminal-header .dot.red { background-color: #ff5f56; }
+        .card-terminal-header .dot.yellow { background-color: #ffbd2e; }
+        .card-terminal-header .dot.green { background-color: #27c93f; }
+
+        .card-terminal-header .terminal-title {
+            margin-left: 8px;
+            font-size: 0.75rem;
+            font-family: 'Fira Code', monospace;
+            color: rgba(255, 255, 255, 0.5);
+            letter-spacing: 0.5px;
         }
 
         .portfolio-card:hover {
             transform: translateY(-8px);
-            border-color: rgba(129, 140, 248, 0.3);
-            box-shadow: 0 15px 40px rgba(129, 140, 248, 0.15);
+            border-color: var(--primary);
+            box-shadow: 0 15px 40px rgba(0, 229, 255, 0.25);
         }
 
         .portfolio-card:hover img {
-            transform: scale(1.05);
+            transform: scale(1.03);
         }
 
         /* Card overlay on hover */
         .card-overlay {
             position: absolute;
             inset: 0;
-            background: linear-gradient(to top, rgba(3, 3, 13, 0.9) 0%, rgba(3, 3, 13, 0) 50%);
+            background: linear-gradient(to top, rgba(3, 7, 18, 0.95) 0%, rgba(3, 7, 18, 0) 50%);
             display: flex;
             align-items: flex-end;
             justify-content: center;
             padding: 1.5rem;
             opacity: 0;
             transition: opacity 0.3s ease;
+            z-index: 5;
         }
 
         .portfolio-card:hover .card-overlay {
@@ -432,21 +484,25 @@
                 this.size = Math.random() * 1.5 + 0.5;
                 this.alpha = Math.random() * 0.7 + 0.3;
                 this.trend = Math.random() > 0.5 ? 0.005 : -0.005;
-                this.velocity = Math.random() * 0.05 + 0.01;
+                this.vx = (Math.random() - 0.5) * 0.2;
+                this.vy = -(Math.random() * 0.05 + 0.01);
             }
             update() {
                 this.alpha += this.trend;
                 if (this.alpha > 1 || this.alpha < 0.2) {
                     this.trend = -this.trend;
                 }
-                this.y -= this.velocity;
+                this.x += this.vx;
+                this.y += this.vy;
                 if (this.y < 0) {
                     this.reset();
                     this.y = canvas.height;
                 }
+                if (this.x < 0) this.x = canvas.width;
+                if (this.x > canvas.width) this.x = 0;
             }
             draw() {
-                ctx.fillStyle = `rgba(255, 255, 255, ${this.alpha})`;
+                ctx.fillStyle = `rgba(0, 229, 255, ${this.alpha * 0.8})`;
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
                 ctx.fill();
@@ -466,6 +522,23 @@
                 star.update();
                 star.draw();
             });
+
+            // Constellation network lines
+            for (let i = 0; i < stars.length; i++) {
+                for (let j = i + 1; j < stars.length; j++) {
+                    const dist = Math.hypot(stars[i].x - stars[j].x, stars[i].y - stars[j].y);
+                    if (dist < 85) {
+                        const alphaVal = (1 - dist / 85) * 0.15;
+                        ctx.beginPath();
+                        ctx.moveTo(stars[i].x, stars[i].y);
+                        ctx.lineTo(stars[j].x, stars[j].y);
+                        ctx.strokeStyle = `rgba(0, 229, 255, ${alphaVal})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.stroke();
+                    }
+                }
+            }
+
             requestAnimationFrame(animate);
         }
 
@@ -490,6 +563,12 @@
             const card = document.createElement('div');
             card.className = 'portfolio-card';
             card.innerHTML = `
+                <div class="card-terminal-header">
+                    <span class="dot red"></span>
+                    <span class="dot yellow"></span>
+                    <span class="dot green"></span>
+                    <span class="terminal-title">portfolio_page_${String(i).padStart(2, '0')}.pdf</span>
+                </div>
                 <img src="port-images/port${i}.jpg" alt="แฟ้มสะสมผลงาน หน้าที่ ${i}" loading="lazy">
                 <div class="card-overlay">
                     <div class="overlay-text">

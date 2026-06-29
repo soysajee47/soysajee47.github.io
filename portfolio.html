@@ -11,19 +11,19 @@
 
     <style>
         :root {
-            --bg-base: #040914;
-            --bg-accent: #0f172a;
-            --text-main: #e2e8f0;
-            --text-muted: #94a3b8;
-            --primary: #818cf8;
-            /* Soft moon glow */
+            --bg-base: #030712;
+            --bg-accent: #0b0f19;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --primary: #00e5ff;
+            /* Cyber Cyan */
             --secondary: #c084fc;
-            /* Violet twilight */
-            --tertiary: #38bdf8;
-            /* Star blue */
-            --card-bg: rgba(15, 23, 42, 0.4);
-            --card-border: rgba(129, 140, 248, 0.2);
-            --glass-glow: rgba(192, 132, 252, 0.15);
+            /* Violet Twilight */
+            --tertiary: #10b981;
+            /* Tech Green */
+            --card-bg: rgba(11, 15, 25, 0.6);
+            --card-border: rgba(0, 229, 255, 0.15);
+            --glass-glow: rgba(0, 229, 255, 0.1);
         }
 
         * {
@@ -410,6 +410,41 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
 
+        .card-terminal-header {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.8rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .card-terminal-header .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .card-terminal-header .dot.red {
+            background-color: #ff5f56;
+        }
+
+        .card-terminal-header .dot.yellow {
+            background-color: #ffbd2e;
+        }
+
+        .card-terminal-header .dot.green {
+            background-color: #27c93f;
+        }
+
+        .card-terminal-header .terminal-title {
+            margin-left: 8px;
+            font-size: 0.75rem;
+            font-family: monospace;
+            color: rgba(255, 255, 255, 0.4);
+            letter-spacing: 0.5px;
+        }
+
         .project-card::before {
             content: '';
             position: absolute;
@@ -671,6 +706,12 @@
 
             <!-- Card 1: เกมส์จับคู่แสนสนุก -->
             <div class="project-card">
+                <div class="card-terminal-header">
+                    <span class="dot red"></span>
+                    <span class="dot yellow"></span>
+                    <span class="dot green"></span>
+                    <span class="terminal-title">fruit_match.js</span>
+                </div>
                 <span class="project-icon">🎮</span>
                 <h3>เกมส์จับคู่แสนสนุก</h3>
                 <p>เกมความจำวัดกึ๋น 5 ด่านที่ปลดล็อคตามลำดับ มีระบบจัดอันดับเซฟลงเครื่อง(LocalStorage)
@@ -685,6 +726,12 @@
 
             <!-- Card 2: GPS เชียงใหม่-พิษณุโลก -->
             <div class="project-card">
+                <div class="card-terminal-header">
+                    <span class="dot red"></span>
+                    <span class="dot yellow"></span>
+                    <span class="dot green"></span>
+                    <span class="terminal-title">gps_tracker.py</span>
+                </div>
                 <span class="project-icon">📍</span>
                 <h3>GPS เชียงใหม่-พิษณุโลก</h3>
                 <p>แผนที่การเดินทางเชิงโต้ตอบแบบ Real-time สุดล้ำ แสดงพิกัด GPS ตลอดเส้นทางจากเชียงใหม่มายังพิษณุโลก
@@ -699,6 +746,12 @@
 
             <!-- Card 3: รถไฟจำลอง 3D -->
             <div class="project-card">
+                <div class="card-terminal-header">
+                    <span class="dot red"></span>
+                    <span class="dot yellow"></span>
+                    <span class="dot green"></span>
+                    <span class="terminal-title">train_3d.js</span>
+                </div>
                 <span class="project-icon">🚂</span>
                 <h3>รถไฟจำลอง 3D</h3>
                 <p>รถไฟจำลองการเดินทาง 3D ทะลุผ่านป่าดอกไม้ โดยอิงจากข้อมูลพิกัด GPS จริง
@@ -713,6 +766,12 @@
 
             <!-- Card 4: เรซูเม่ฉบับย่อ วัดใหญ่ -->
             <div class="project-card">
+                <div class="card-terminal-header">
+                    <span class="dot red"></span>
+                    <span class="dot yellow"></span>
+                    <span class="dot green"></span>
+                    <span class="terminal-title">cv_minimal.html</span>
+                </div>
                 <span class="project-icon">📄</span>
                 <h3>เรซูเม่ฉบับย่อ วัดใหญ่</h3>
                 <p>ประวัติส่วนตัวฉบับย่อ ดีไซน์สุดคลีนแต่ทรงพลัง โหลดไว ปรับปรุงจาก Semantic HTML เพียวๆ ไม่พึ่งพิง
@@ -727,6 +786,12 @@
 
             <!-- Card 5: DustBoy Cyber-Dashboard -->
             <div class="project-card">
+                <div class="card-terminal-header">
+                    <span class="dot red"></span>
+                    <span class="dot yellow"></span>
+                    <span class="dot green"></span>
+                    <span class="terminal-title">dustboy_mqtt.ino</span>
+                </div>
                 <span class="project-icon">📡</span>
                 <h3>DustBoy Cyber-Dashboard</h3>
                 <p>หน้าปัดคุณภาพอากาศแบบ Real-time ดึงข้อมูลเซนเซอร์ DustBoy ผ่านระบบ MQTT พร้อมดีไซน์ Cyberpunk
@@ -741,6 +806,12 @@
 
             <!-- Card 6: JIBCHAIN Sensor Dash -->
             <div class="project-card">
+                <div class="card-terminal-header">
+                    <span class="dot red"></span>
+                    <span class="dot yellow"></span>
+                    <span class="dot green"></span>
+                    <span class="terminal-title">jibchain_contract.sol</span>
+                </div>
                 <span class="project-icon">⛓️</span>
                 <h3>JIBCHAIN Sensor Dash</h3>
                 <p>หน้าปัดติดตามข้อมูลเซนเซอร์ระดับน้ำบนบล็อกเชน Layer 1 (JIBCHAIN) แบบ Real-time ด้วย Viem.js และ
@@ -806,12 +877,28 @@
                 if (s.y < 0) s.y = height;
                 if (s.y > height) s.y = 0;
 
-                // Draw
+                // Draw star node
                 ctx.beginPath();
                 ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(226, 232, 240, ${s.alpha})`;
+                ctx.fillStyle = `rgba(0, 229, 255, ${s.alpha * 0.8})`;
                 ctx.fill();
             });
+
+            // Draw fine link lines between close stars (constellation / neural network effect)
+            for (let i = 0; i < stars.length; i++) {
+                for (let j = i + 1; j < stars.length; j++) {
+                    const dist = Math.hypot(stars[i].x - stars[j].x, stars[i].y - stars[j].y);
+                    if (dist < 85) {
+                        const lineAlpha = (1 - dist / 85) * 0.15;
+                        ctx.beginPath();
+                        ctx.moveTo(stars[i].x, stars[i].y);
+                        ctx.lineTo(stars[j].x, stars[j].y);
+                        ctx.strokeStyle = `rgba(0, 229, 255, ${lineAlpha})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.stroke();
+                    }
+                }
+            }
 
             requestAnimationFrame(drawStars);
         }
