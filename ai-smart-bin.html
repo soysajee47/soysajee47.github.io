@@ -1052,6 +1052,91 @@
         <p>ระบบอัจฉริยะคัดแยกขยะรีไซเคิลด้วย AI — Senior Project · Computer Engineering</p>
     </footer>
 
+    <!-- BACKGROUND MUSIC -->
+    <audio id="bg-music" loop>
+        <!-- Placeholder ambient music. You can change the src URL to your own audio file -->
+        <source src="https://cdn.pixabay.com/audio/2022/11/22/audio_d1718ab41b.mp3" type="audio/mpeg">
+    </audio>
+
+    <button id="music-toggle" class="music-btn" title="Toggle Background Music">
+        🔇 Music: Off
+    </button>
+
+    <style>
+        .music-btn {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: rgba(167, 139, 250, 0.2);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(167, 139, 250, 0.4);
+            color: #fff;
+            padding: 0.8rem 1.5rem;
+            border-radius: 100px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            z-index: 9999;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            font-family: 'Inter', sans-serif;
+        }
+        .music-btn:hover {
+            background: rgba(167, 139, 250, 0.4);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(167, 139, 250, 0.3);
+        }
+    </style>
+
+    <script>
+        const bgMusic = document.getElementById('bg-music');
+        const musicBtn = document.getElementById('music-toggle');
+        let isMusicPlaying = false;
+        
+        // ตั้งระดับเสียงให้เบาๆ จะได้ไม่รบกวน (20%)
+        bgMusic.volume = 0.2;
+
+        function toggleMusic() {
+            if (isMusicPlaying) {
+                bgMusic.pause();
+                musicBtn.innerHTML = '🔇 Music: Off';
+                isMusicPlaying = false;
+            } else {
+                bgMusic.play().then(() => {
+                    musicBtn.innerHTML = '🔊 Music: On';
+                    isMusicPlaying = true;
+                }).catch(e => {
+                    console.log("Autoplay blocked.");
+                });
+            }
+        }
+
+        musicBtn.addEventListener('click', toggleMusic);
+
+        // ให้เพลงเริ่มเล่นอัตโนมัติเมื่อผู้ใช้คลิกบนหน้าเว็บครั้งแรก (เนื่องจากเบราว์เซอร์บล็อก Autoplay)
+        window.addEventListener('click', function initMusic(e) {
+            // ป้องกันไม่ให้ทำงานซ้ำถ้ากดที่ปุ่ม music toggle หรือคลิกใน iframe
+            if (e.target.id !== 'music-toggle' && document.activeElement.tagName !== 'IFRAME') {
+                if (!isMusicPlaying) {
+                    toggleMusic();
+                }
+                window.removeEventListener('click', initMusic);
+            }
+        });
+
+        // ตรวจจับการคลิกเข้าไปในวิดีโอ (iframe) เพื่อหยุดเพลงอัตโนมัติ
+        window.addEventListener('blur', function() {
+            // เมื่อหน้าต่างเสีย focus และ element ที่ถูก focus คือ iframe (วิดีโอ)
+            if (document.activeElement.tagName === 'IFRAME') {
+                if (isMusicPlaying) {
+                    toggleMusic(); // หยุดเพลงเมื่อดูวิดีโอ
+                }
+            }
+        });
+    </script>
 </body>
 
 </html>
