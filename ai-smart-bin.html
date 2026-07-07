@@ -138,6 +138,35 @@
             max-width: 800px;
         }
 
+        .floating-items {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .floating-items .item {
+            position: absolute;
+            font-size: 3rem;
+            opacity: 0.2;
+            animation: float-up 15s linear infinite;
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.2));
+        }
+
+        .bottle-1 { left: 15%; bottom: -15%; animation-duration: 20s; animation-delay: 0s; font-size: 3.5rem; }
+        .bottle-2 { left: 75%; bottom: -15%; animation-duration: 25s; animation-delay: 5s; font-size: 4.5rem; }
+        .bottle-3 { left: 35%; bottom: -15%; animation-duration: 18s; animation-delay: 2s; font-size: 2.8rem; }
+        .bottle-4 { left: 85%; bottom: -15%; animation-duration: 22s; animation-delay: 8s; font-size: 3rem; }
+        .bottle-5 { left: 55%; bottom: -15%; animation-duration: 16s; animation-delay: 12s; font-size: 3.2rem; }
+
+        @keyframes float-up {
+            0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.3; }
+            90% { opacity: 0.3; }
+            100% { transform: translateY(-120vh) rotate(360deg); opacity: 0; }
+        }
+
         .badge {
             display: inline-flex;
             align-items: center;
@@ -740,6 +769,16 @@
     <div class="hero">
         <div class="hero-bg"></div>
         <div class="grid-lines"></div>
+        
+        <!-- Floating Elements -->
+        <div class="floating-items">
+            <div class="item bottle-1">🍾</div>
+            <div class="item bottle-2">🧴</div>
+            <div class="item bottle-3">🥤</div>
+            <div class="item bottle-4">♻️</div>
+            <div class="item bottle-5">🗑️</div>
+        </div>
+
         <div class="hero-content">
             <div class="badge">
                 <div class="pulse-dot"></div>Senior Project · Computer Engineering
