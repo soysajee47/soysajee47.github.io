@@ -736,6 +736,122 @@
         </div>
     </section>
 
+    <!-- Contact Section -->
+    <style>
+        .contact-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(0, 229, 255, 0.15);
+            border-radius: 20px;
+            padding: 2.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 10px 40px -10px rgba(0, 229, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .contact-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 2px;
+            background: linear-gradient(90deg, transparent, #00e5ff, #bd00ff, transparent);
+            opacity: 0.6;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            padding: 1.2rem;
+            border-radius: 14px;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid transparent;
+        }
+        
+        .contact-item:hover {
+            background: rgba(0, 229, 255, 0.04);
+            transform: translateX(8px);
+            border: 1px solid rgba(0, 229, 255, 0.2);
+            box-shadow: 0 4px 20px rgba(0, 229, 255, 0.1);
+        }
+
+        .contact-icon {
+            font-size: 1.6rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 54px;
+            height: 54px;
+            background: rgba(0, 229, 255, 0.08);
+            border-radius: 50%;
+            border: 1px solid rgba(0, 229, 255, 0.2);
+            color: #00e5ff;
+            flex-shrink: 0;
+            box-shadow: inset 0 0 10px rgba(0, 229, 255, 0.1);
+        }
+
+        .contact-details {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+            text-align: left;
+        }
+
+        .contact-label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: rgba(255, 255, 255, 0.35);
+            font-weight: 700;
+        }
+
+        .contact-value {
+            font-size: 1.05rem;
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            transition: all 0.3s;
+            line-height: 1.5;
+        }
+
+        a.contact-value:hover {
+            color: #00e5ff;
+            text-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
+        }
+    </style>
+
+    <section id="contact" style="padding: 2rem 1rem 5rem; text-align: center;">
+        <h2 class="section-title">ช่องทางการติดต่อ</h2>
+        <div class="contact-card">
+            <div class="contact-item">
+                <div class="contact-icon">📧</div>
+                <div class="contact-details">
+                    <span class="contact-label">Email</span>
+                    <a href="mailto:soysajee2547@gmail.com" class="contact-value">soysajee2547@gmail.com</a>
+                </div>
+            </div>
+            <div class="contact-item">
+                <div class="contact-icon">📞</div>
+                <div class="contact-details">
+                    <span class="contact-label">Phone</span>
+                    <a href="tel:0966628341" class="contact-value">0966628341</a>
+                </div>
+            </div>
+            <div class="contact-item">
+                <div class="contact-icon">📍</div>
+                <div class="contact-details">
+                    <span class="contact-label">Address</span>
+                    <span class="contact-value">100/3 ม.3 ต.ปากโทก<br>อ.เมือง จ.พิษณุโลก 65000</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <footer>
         <p>&copy; 2026 สร้อยศจี จันทวงค์. The Moon Lover Collection.</p>
         <p class="oracle-sig">Guided by Moon Lover Oracle 🌕</p>
